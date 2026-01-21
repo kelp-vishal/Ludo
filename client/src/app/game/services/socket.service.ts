@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { IRoom } from '../../interfaces/socket.interfaces';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class SocketService {
@@ -36,7 +37,7 @@ export class SocketService {
       return;
     }
 
-    this.socket = io('https://f1vbcpxc-3002.inc1.devtunnels.ms', {
+    this.socket = io(environment.socketUrl, {
       path: '/socket.io',
       transports: ['websocket'],
       reconnection: true,

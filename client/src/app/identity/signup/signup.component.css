@@ -1,0 +1,133 @@
+
+form {
+  width: 90%;
+  max-width: 40rem;
+  margin: 3rem auto;
+  padding: 2rem;
+  background: linear-gradient(180deg, #1d3ca3, #051667);
+  border-radius: 8px;
+  box-shadow: 0 0 16px 1px rgba(0, 0, 0, 0.5);
+}
+
+form h2 {
+  margin: 0 0 0.25rem 0;
+  color: #d9e2f1;
+}
+
+form p {
+  margin: 0 0 1.5rem 0;
+  color: #9bafaf;
+}
+
+.control {
+  margin: 0.5rem 0;
+}
+
+.control label {
+  display: block;
+  font-size: 0.8rem;
+  margin-bottom: 0.2rem;
+  color: #9bafaf;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.control input {
+  display: block;
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: 1px solid #758a8a;
+  background-color: #869999;
+  color: #142020;
+}
+
+.control input:focus {
+  outline: none;
+  background-color: #a1b4b4;
+  border-color: #147b73;
+}
+
+.control-row {
+  margin: 0.5rem 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.control-row .control {
+  flex: 1;
+}
+
+.control-error {
+  color: #f44336;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+.control-success {
+  color: #4caf50;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  text-align: center;
+  font-weight: bold;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: none;
+  background-color: #147b73;
+  color: #d9e2f1;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.button:hover:not(:disabled),
+.button:focus:not(:disabled) {
+  background-color: #319890;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.button-flat {
+  background-color: transparent;
+  color: #9cbaba;
+}
+
+.button-flat:hover:not(:disabled),
+.button-flat:focus:not(:disabled) {
+  background-color: transparent;
+  color: #869999;
+}
+
+.form-info {
+  margin-top: 1.5rem;
+  text-align: center;
+  color: #9bafaf;
+  font-size: 0.9rem;
+}
+
+.form-info a {
+  color: #147b73;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.form-info a:hover {
+  color: #319890;
+  text-decoration: underline;
+}

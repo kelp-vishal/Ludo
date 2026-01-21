@@ -1,0 +1,68 @@
+:root{
+    --sidebar-width: 400px;
+    --sidebar-bg: #12c7f5;
+
+    --link-color: #0b3a4a;
+}
+
+.sidebar{
+    /* font-family: 'Times New Roman', Times, serif; */
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 100px;
+    /* width: var(--sidebar-width); */
+    background: rgb(2, 19, 170);
+    background-image: linear-gradient(120, #e6edee, #00a8e8) !important;
+    color: rgb(239, 239, 239);
+    font-family: 'Courier New', Courier, monospace;
+    padding: 20px 22px;
+    box-shadow: 2px 0 6px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center; 
+}
+
+.sidebar .brand{
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--link-color);
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.sidebar ul{
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    /* font-family: 'Times New Roman', Times, serif; */
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.sidebar ul li a{
+    color: var(--link-color);
+    text-decoration: none;
+    padding: 8px 10px;
+    border-radius: 6px;
+    display: flex;
+    font-weight: 600;
+    align-items: center;           /* vertical center */
+    text-align: center;            /* text center */
+    font-weight: 600;
+}
+
+.sidebar ul li a:hover{
+    background: rgba(255, 255, 255, 0.08);
+
+}
+
+/* Ensure main content is not hidden under the sidebar */
+@media (max-width: 700px){
+    .sidebar{ position: relative; width: 100%; height: auto; box-shadow: none; flex-direction: row; align-items:center; }
+    .sidebar ul{ flex-direction: row; }
+}

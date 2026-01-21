@@ -1,0 +1,21 @@
+
+<nav class="sidebar">
+  <div class="brand">Ludo</div>
+  <ul>
+    <li><a href="/">Home</a></li>
+    <li><a (click)="startGame()" style="cursor: pointer;">Play</a></li>
+    <li><a href="/">About</a></li>
+    
+    <!-- Show when NOT logged in -->
+    <ng-container *ngIf="!isLoggedIn">
+      <li><a href="/login">Login</a></li>
+      <li><a href="/signup">Signup</a></li>
+    </ng-container>
+    
+    <!-- Show when logged in -->
+    <ng-container *ngIf="isLoggedIn">
+      <li><a style="color: #4CAF50;">{{ username }}</a></li>
+      <li><a (click)="logout()" style="cursor: pointer;">Logout</a></li>
+    </ng-container>
+  </ul>
+</nav>

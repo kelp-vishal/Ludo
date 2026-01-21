@@ -1,0 +1,168 @@
+
+<div class="game-container">
+  <!-- <h1>Hello</h1> -->
+  <div class="ludo-board">
+    <div class="cell" 
+         *ngFor="let cell of gridCells; let i =index"
+         [style.grid-column]="(i% 15)+1"
+
+         [style.grid-row]="Math.floor(i/15)+1"
+         [class.home-red]="isRedHome(i)"
+         [class.home-yellow]="isYellowHome(i)"
+         [class.home-green]="isGreenHome(i)"
+         [class.home-blue]="isBlueHome(i)"
+
+         [class.border-red]="isRedBorder(i)"
+         [class.border-green]="isGreenBorder(i)"
+         [class.border-blue]="isBlueBorder(i)"
+         [class.border-yellow]="isYellowBorder(i)"
+         [class.Base-All] ="isBaseAll(i)"
+
+         [class.red-path]="isRedPath(i)"
+         
+         [class.yellow-path]="isYellowPath(i)"
+         [class.blue-path]="isBluePath(i)"
+         [class.green-path]="isGreenPath(i)"
+         
+         [class.safe-zone]="isSafeZone(i)"
+         
+         [class.finish-zone]="isFinishZone(i)"
+         [class.path]="true">
+         
+    </div>
+
+    <!-- Pieces -->
+    <div *ngFor="let piece of pieces$ | async"
+         class="piece" 
+         [class.red]="piece.color === 'red'"
+         [class.yellow]="piece.color === 'yellow'"
+         [class.blue]="piece.color === 'blue'"
+         [class.green]="piece.color === 'green'"
+          [class.movable]="isMyPiece(piece) && gameState?.movablePieces?.includes(piece.id)" 
+         [style.left.px]="piece.currentX + getPieceOffset(piece).x"
+         [style.top.px]="piece.currentY + getPieceOffset(piece).y"
+         [style.transform]="'scale('+getPieceScale(piece)+ ')'"
+         (click)="selectPiece(piece.id)"
+         [attr.data-id]="piece.id">
+    </div>
+  </div>
+
+  <div class="dice-button"
+        [class.Red-Turn]="IsRedTurn()"
+        [class.Blue-Turn]="IsBlueTurn()"
+        [class.Yellow-Turn]="IsYellowTurn()"
+        [class.Green-Turn]="IsGreenTurn()"
+  >
+    <div class="turn-info"
+    >{{getCurrentPlayerName()}}'s Turn</div>
+    
+    <div class="dice-container" 
+         (click)="rollDice()" 
+         [class.disabled]="!isMyTurn() || (gameState?.diceValue || 0) > 0 || isGameWon()"
+         [style.pointer-events]="!isMyTurn() || (gameState?.diceValue || 0) > 0 || isGameWon() ? 'none' : 'auto'"
+         [style.opacity]="!isMyTurn() || (gameState?.diceValue || 0) > 0 || isGameWon() ? '0.5' : '1'"
+         [style.cursor]="isMyTurn() && (gameState?.diceValue || 0) === 0 && !isGameWon() ? 'pointer' : 'not-allowed'">
+      <div class="dice" 
+           [class.rolling]="isRolling" 
+           [attr.data-value]="gameState?.diceValue || 1"
+           
+           >
+        <!-- Face 1 -->
+        <div class="face front">
+          <span class="dot" style="grid-area: d;"></span>
+        </div>
+        
+        <!-- Face 2 -->
+        <div class="face back">
+          <span class="dot"></span>
+          <span class="dot" style="grid-area: g;"></span>
+        </div>
+        
+        <!-- Face 3 -rigth -->
+        <div class="face left">
+          <span class="dot"></span>
+          <span class="dot" style="grid-area: d;"></span>
+          <span class="dot" style="grid-area: g;"></span>
+        </div>
+        
+        <!-- Face 4-left-->
+        <div class="face right">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot" style="grid-area: f;"></span>
+          <span class="dot" style="grid-area: g;"></span>
+        </div>
+        
+        <!-- Face 5-top -->
+        <div class="face top">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot" style="grid-area: d;"></span>
+          <span class="dot" style="grid-area: f;"></span>
+          <span class="dot" style="grid-area: g;"></span>
+        </div>
+        
+        <!-- Face 6-bottom -->
+        <div class="face bottom">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot" style="grid-area: c;"></span>
+          <span class="dot" style="grid-area: e;"></span>
+          <span class="dot" style="grid-area: f;"></span>
+          <span class="dot" style="grid-area: g;"></span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="dice-instruction">
+      {{(gameState?.diceValue || 0) > 0 ? 'Select a piece to move' : 'Click dice to roll'}}
+    </div>
+    
+    <div *ngIf="isGameWon()" class="win-message">\n      {{gameState?.gameWon}} WINS!! 
+    </div>
+  </div>
+</div>
+
+<!-- <div
+  *ngFor="let piece of gameService.pieces"
+  [ngStyle]="{ left: piece.currentX + 'px', top: piece.currentY + 'px' }"
+  [class.movable]="gameState.movablePieces.includes(piece.id)">
+</div> -->
+
+
+
+<!-- <div class="game-container">
+  Game Info
+  <div class="dice-button">
+    <div>{{getCurrentPlayer()}}'s Turn ({{gameService.gameState.diceValue || '?'}})</div>
+    <button class="roll-btn" (click)="rollDice()" [disabled]="gameService.gameState.diceValue > 0 || isGameWon()">
+      Roll Dice
+    </button>
+    <div *ngIf="isGameWon()" class="win-message">
+      {{gameService.gameState.gameWon}} WINS! 
+    </div>
+  </div>  -->
+ 
+  <!-- 15x15 Board -->
+  <!-- <div class="ludo-board">
+    <div class="cell" *ngFor="let cell of gridCells; let i = index"
+         [style.grid-column]="(i % 15) + 1"
+         [style.grid-row]="Math.floor(i / 15) + 1">
+    </div>  -->
+    <!-- Visible Pieces Only -->
+    <!-- <div *ngFor="let piece of getVisiblePieces()"
+         class="piece"
+         [class.red]="piece.color === 'red'"
+         
+         [style.left.px]="piece.currentX"
+         [style.top.px]="piece.currentY"
+         (click)="selectPiece(piece.id)">
+    </div> -->
+  <!-- </div> -->
+<!-- </div> -->
+ 
+ 
+
+
+
+

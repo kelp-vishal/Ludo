@@ -175,13 +175,6 @@ export class GameService {
       this.myColor = this.gameState.activePlayers[0];
     }
 
-    console.log(
-      'Starting game with players:',
-      this.gameState.activePlayers,
-      'My color:',
-      this.myColor,
-    );
-
     this.gameState.pieces = {};
     this.gameState.activePlayers.forEach((color) => {
       for (let i = 0; i < 4; i++) {
@@ -195,17 +188,12 @@ export class GameService {
     this.gameState.diceValue = 0;
     this.gameState.gameWon = null;
     this.gameState.movablePieces = [];
-
-    console.log('Initial game state:', this.gameState);
-
-    console.log('Initialized pieces:', this.pieces);
   }
 
   rollDice(): number {
     const currentPlayer =
       this.gameState.activePlayers[this.gameState.currentTurn];
     if (currentPlayer !== this.myColor) {
-      console.log('Not your turn');
       return this.gameState.diceValue;
     }
 
@@ -215,10 +203,6 @@ export class GameService {
       currentPlayer,
       this.gameState.diceValue,
     );
-
-    if (this.gameState.movablePieces.length === 0) {
-      console.log('No movable pieces - turn will pass after delay');
-    }
 
     this.gameStateSubject.next({ ...this.gameState });
     return this.gameState.diceValue;
@@ -247,11 +231,6 @@ export class GameService {
       currentPlayer !== color ||
       !this.gameState.movablePieces.includes(pieceId)
     ) {
-      console.log('Invalid move:', {
-        currentPlayer,
-        color,
-        movablePieces: this.gameState.movablePieces,
-      });
       return false; // Invalid
     }
 
@@ -312,16 +291,6 @@ export class GameService {
 
     this.isAnimating = false;
 
-    console.log(
-      'Piece moved:',
-      pieceId,
-      'from',
-      oldPos,
-      'to',
-      finalPos,
-      'Next turn:',
-      this.gameState.activePlayers[this.gameState.currentTurn],
-    );
     return true;
   }
 
@@ -330,7 +299,6 @@ export class GameService {
   }
 
   updateGameState(newState: IGameState): void {
-    console.log('Update GameState. to next');
     this.gameState = { ...newState };
     this.gameStateSubject.next({ ...this.gameState });
   }

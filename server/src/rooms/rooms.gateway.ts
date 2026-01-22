@@ -77,7 +77,6 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody()
     data: { playerCount: number; playerName: string; socketId: string },
   ): void {
-    // console.log(' vishal visshal')
     const roomId = this.generateRoomId();
     const room: IGameRoom = {
       roomId,
@@ -163,8 +162,6 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     this.playerRooms.set(client.id, data.roomId);
     client.join(data.roomId);
-
-    console.log(`Player ${client.id} joined room ${data.roomId}`);
 
     // Notify the joining player
     client.emit('room-joined', {

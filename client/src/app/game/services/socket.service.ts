@@ -52,13 +52,12 @@ export class SocketService {
     });
 
     this.socket.on('connect', () => {
-      console.log('Connected to WebSocket server');
+      // console.log('Connected to WebSocket server');
       this.connectedSubject.next(true);
       this.socketIdSubject.next(this.socket!.id || '');
     });
 
     this.socket.on('disconnect', () => {
-      console.log('Disconnected from WebSocket server');
       this.connectedSubject.next(false);
     });
 
@@ -68,13 +67,11 @@ export class SocketService {
 
     // Room events
     this.socket.on('room-created', (data: { room: IRoom }) => {
-      console.log('Room created:', data.room);
       this.currentRoomSubject.next(data.room);
       this.playersInRoomSubject.next(data.room.players);
     });
 
     this.socket.on('room-joined', (data: { room: IRoom; message: string }) => {
-      console.log('Joined room:', data.room);
       this.currentRoomSubject.next(data.room);
       this.playersInRoomSubject.next(data.room.players);
     });
@@ -82,14 +79,12 @@ export class SocketService {
     this.socket.on(
       'player-joined',
       (data: { room: IRoom; message: string }) => {
-        console.log('Player joined room:', data.message);
         this.currentRoomSubject.next(data.room);
         this.playersInRoomSubject.next(data.room.players);
       },
     );
 
     this.socket.on('player-left', (data: { room: IRoom; message: string }) => {
-      console.log('Player left room:', data.message);
       if (data.room) {
         this.currentRoomSubject.next(data.room);
         this.playersInRoomSubject.next(data.room.players);
@@ -97,7 +92,6 @@ export class SocketService {
     });
 
     this.socket.on('rooms-list', (data: { rooms: IRoom[] }) => {
-      console.log('Available rooms:', data.rooms);
       this.roomsSubject.next(data.rooms);
     });
 
@@ -110,18 +104,15 @@ export class SocketService {
     );
 
     this.socket.on('game-state-update', (data: IRemoteGameState) => {
-      console.log('Game state updated:', data);
       this.remoteGameStateSubject.next(data);
     });
 
     this.socket.on('room-error', (data: { message: string }) => {
-      console.error('Room error:', data.message);
     });
   }
 
   createRoom(playerCount: number, playerName: string = 'Player'): void {
     if (this.socket) {
-      console.log('Socket service ts');
       this.socket.emit('create-room', {
         playerCount,
         playerName,

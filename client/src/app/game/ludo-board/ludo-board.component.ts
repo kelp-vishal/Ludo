@@ -41,7 +41,7 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
     const gameStateSubscription = this.gameService.gameState$.subscribe(
       (state) => {
         this.gameState = state;
-        this.triggerAnimations();
+        // this.triggerAnimations();
       },
     );
 
@@ -93,15 +93,15 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
     }
   }
 
-  triggerAnimations() {
-    if (!this.gameState) return;
-    this.gameState.movablePieces.forEach((pieceId) => {
-      const piece = this.gameService.pieces.find((p) => p.id === pieceId);
-      if (piece) {
-        console.log(`Animate piece ${piece.id} at position ${piece.position}`);
-      }
-    });
-  }
+  // triggerAnimations() {
+  //   if (!this.gameState) return;
+  //   this.gameState.movablePieces.forEach((pieceId) => {
+  //     const piece = this.gameService.pieces.find((p) => p.id === pieceId);
+  //     if (piece) {
+  //       console.log(`Animate piece ${piece.id} at position ${piece.position}`);
+  //     }
+  //   });
+  // }
 
   getCurrentPlayerName(): string {
     const currentColor = this.gameService.getCurrentPlayer();
@@ -116,7 +116,6 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
   }
 
   rollDice() {
-    console.log(this.gameState);
     if (!this.gameState?.gameWon && this.isMyTurn()) {
       this.isRolling = true;
       const rolledValue = this.gameService.rollDice();
@@ -128,7 +127,6 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
         // Check if  no movable pieces
         if (this.gameState?.movablePieces?.length === 0) {
           // setTimeout(() => {
-          console.log('GameStateUpdate in ludo-board.ts');
           if (this.gameState) {
             this.gameState.diceValue = 0;
             this.gameState.currentTurn =
@@ -139,7 +137,7 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
           }
           // }, 1000);
         } else {
-          // Normal cas
+          // Normal case
 
           // Auto-move if -one piece only
           if (this.gameState?.movablePieces?.length === 1) {
@@ -178,8 +176,6 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
 
     const moved = await this.gameService.movePiece(pieceId);
     if (moved === true) {
-      console.log('Piece moved:', pieceId);
-
       //Sync
       this.syncGameStateWithOthers();
     }

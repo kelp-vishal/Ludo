@@ -38,15 +38,11 @@ export class GameSetupComponent implements OnInit {
     // Checking socket connectin
     this.socketService.connected$.subscribe((connected) => {
       this.isSocketConnected = connected;
-      if (connected) {
-        console.log('Socket connected in game-setup');
-      }
     });
 
     // Get socket ID
     this.socketService.socketId$.subscribe((id) => {
       this.socketId = id;
-      console.log('Socket ID:', id);
     });
 
     // Listen for room updates
@@ -84,7 +80,6 @@ export class GameSetupComponent implements OnInit {
 
     this.roomService.availableRooms$.subscribe((rooms) => {
       this.availableRooms = rooms;
-      console.log('Available rooms:', rooms);
     });
   }
 
@@ -111,11 +106,7 @@ export class GameSetupComponent implements OnInit {
       alert('Please enter your name');
       return;
     }
-    // console.log('Vishal vishal');
 
-    console.log(
-      `Creating room for ${this.selectedPlayerCount} players...${this.playerName}`,
-    );
     this.roomService.createRoom(this.selectedPlayerCount, this.playerName);
   }
 
@@ -130,7 +121,6 @@ export class GameSetupComponent implements OnInit {
       return;
     }
 
-    console.log(`Joining room ${roomId}...`);
     this.roomService.joinRoom(roomId, this.playerName);
   }
 
@@ -141,8 +131,6 @@ export class GameSetupComponent implements OnInit {
       return;
     }
 
-    console.log('Host Starting game in room:', currentRoom.roomId);
-
     this.roomService.startGame();
     // this.router.navigate(['/ludo-board']);
   }
@@ -152,7 +140,7 @@ export class GameSetupComponent implements OnInit {
     this.showCreateRoom();
   }
 
-  isHost(room:{hostSocketId:string}): boolean {
+  isHost(room: { hostSocketId: string }): boolean {
     return room?.hostSocketId === this.socketId;
   }
 }

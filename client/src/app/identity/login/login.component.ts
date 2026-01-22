@@ -1,6 +1,5 @@
-import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject } from '@angular/core';
 import {
-  AbstractControl,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
@@ -17,7 +16,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent {
   private destroyRef = inject(DestroyRef);
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -64,20 +63,14 @@ export class LoginComponent implements OnInit {
 
     this.authService.login(username, password).subscribe({
       next: (response) => {
-        console.log('Login successful:', response);
         this.isLoading = false;
         this.router.navigate(['/game-setup']);
       },
       error: (error) => {
-        console.error('Login error:', error);
         this.isLoading = false;
         this.errorMessage =
           error.error?.message || 'Login failed. Please try again.';
       },
     });
-  }
-
-  ngOnInit(): void {
-    // Auto-fill - localStorage -later
   }
 }

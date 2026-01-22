@@ -29,14 +29,12 @@ export class HomeComponent implements OnInit {
     try {
       // Check if user is logged in
       if (this.authService.isLoggedIn()) {
-        console.log('User is authenticated, redirecting to game setup');
         this.router.navigate(['/game-setup']);
       } else {
-        console.log('User not authenticated, redirecting to login');
         this.router.navigate(['/signup']);
       }
     } catch (error) {
-      console.error('Error starting the game:', error);
+      throw new Error(`Failed to start game: ${error}`);
     }
   }
 }

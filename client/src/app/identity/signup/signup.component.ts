@@ -105,7 +105,6 @@ export class SignupComponent {
 
     this.authService.register(username, email, password).subscribe({
       next: (response) => {
-        console.log('Registration successful:', response);
         this.isLoading = false;
         this.successMessage =
           'Account created successfully! Redirecting to login...';
@@ -114,7 +113,6 @@ export class SignupComponent {
         }, 2000);
       },
       error: (error) => {
-        console.error('Registration error:', error);
         this.isLoading = false;
         this.errorMessage =
           error.error?.message || 'Registration failed. Please try again.';

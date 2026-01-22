@@ -18,7 +18,10 @@ import { AuthService } from './auth.service';
 import { Public } from './public.decorator';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { IRegisterResponse, ISignInResponse } from 'src/interfaces/auth.interfaces';
+import {
+  IRegisterResponse,
+  ISignInResponse,
+} from 'src/interfaces/auth.interfaces';
 
 @ApiTags('auth')
 @Controller('auth')

@@ -45,7 +45,6 @@ export class RoomService {
   }
 
   createRoom(playerCount: number, playerName: string = 'Player'): void {
-    console.log('Vishal');
     this.socketService.createRoom(playerCount, playerName);
   }
 

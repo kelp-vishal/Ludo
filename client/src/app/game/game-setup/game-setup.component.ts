@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
-import { IAvailableRoom } from '../../interfaces/ludoboard.interfaces';
+import { IAvailableRoom, IGameState } from '../../interfaces/ludoboard.interfaces';
 
 @Component({
   selector: 'app-game-setup',
@@ -45,16 +45,9 @@ export class GameSetupComponent implements OnInit {
       this.socketId = id;
     });
 
-    // Listen for room updates
-    this.roomService.currentRoom$.subscribe((room) => {
-      if (room) {
-        console.log('Joined room:', room);
-      }
-    });
-
     this.socketService.gameStarted$.subscribe((data) => {
       if (data && data.room) {
-        const currentRoom = data.room;
+        const currentRoom = data.room; 
 
         const TURN_ORDER = ['RED', 'BLUE', 'GREEN', 'YELLOW'];
         const joinedColors = currentRoom.players.map(

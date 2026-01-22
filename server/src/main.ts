@@ -4,14 +4,13 @@ import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') || 3002;
   const frontendLocal = configService.get<string>('FRONTEND_LOCAL');
-  const frontendTunnel = configService.get<string>('FRONTEND_TUNNEL');
 
   // Enable validation globally
   app.useGlobalPipes(
@@ -24,7 +23,7 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors({
-    origin: [frontendLocal, frontendTunnel],
+    origin: [frontendLocal],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { IRoom } from '../../interfaces/socket.interfaces';
 import { environment } from '../../../environments/environment';
 import { IGameState } from '../../interfaces/ludoboard.interfaces';
@@ -19,10 +19,11 @@ export class SocketService {
     Array<{ socketId: string; color?: string }>
   >([]);
   private gameStateSubject = new BehaviorSubject<IGameState | null>(null);
-  private gameStartedSubject = new BehaviorSubject<any>(null);
-  private remoteGameStateSubject = new BehaviorSubject<IRemoteGameState | null>(null);
+  private gameStartedSubject = new BehaviorSubject<IGameState  | null>(null);
+  private remoteGameStateSubject = new BehaviorSubject<IRemoteGameState | null>(
+    null,
+  );
   remoteGameState$ = this.remoteGameStateSubject.asObservable();
-
 
   connected$ = this.connectedSubject.asObservable();
   socketId$ = this.socketIdSubject.asObservable();
@@ -37,7 +38,7 @@ export class SocketService {
     this.connect();
   }
 
-  connect() {
+  connect(): void {
     if (this.socket) {
       return;
     }
@@ -52,17 +53,12 @@ export class SocketService {
     });
 
     this.socket.on('connect', () => {
-      // console.log('Connected to WebSocket server');
       this.connectedSubject.next(true);
       this.socketIdSubject.next(this.socket!.id || '');
     });
 
     this.socket.on('disconnect', () => {
       this.connectedSubject.next(false);
-    });
-
-    this.socket.on('connect_error', (error) => {
-      console.error('Connection error:', error);
     });
 
     // Room events
@@ -95,20 +91,16 @@ export class SocketService {
       this.roomsSubject.next(data.rooms);
     });
 
-    this.socket.on(
-      'game-started',
-      (data: IGameState) => {
-        // this.currentRoomSubject.next(data.room);
-        this.gameStartedSubject.next(data);
-      },
-    );
+    this.socket.on('game-started', (data: IGameState) => {
+      // this.currentRoomSubject.next(data.room);
+      this.gameStartedSubject.next(data);
+    });
 
     this.socket.on('game-state-update', (data: IRemoteGameState) => {
       this.remoteGameStateSubject.next(data);
     });
 
-    this.socket.on('room-error', (data: { message: string }) => {
-    });
+    this.socket.on('room-error', (data: { message: string }) => {});
   }
 
   createRoom(playerCount: number, playerName: string = 'Player'): void {
@@ -155,7 +147,7 @@ export class SocketService {
     }
   }
 
-  sendGameStateUpdate(gameState: any): void {
+  sendGameStateUpdate(gameState: IGameState): void {
     if (this.socket) {
       this.socket.emit('game-state-update', {
         socketId: this.socket.id,

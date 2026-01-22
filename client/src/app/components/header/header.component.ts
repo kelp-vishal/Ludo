@@ -18,7 +18,7 @@ export class HeaderComponent implements OnInit {
     private authService: AuthService,
   ) {}
 
-  ngOnInit() {
+  ngOnInit():void {
     // Subscribe to authentication status
     this.authService.currentUser$.subscribe((user) => {
       this.isLoggedIn = !!user;
@@ -26,7 +26,7 @@ export class HeaderComponent implements OnInit {
     });
   }
 
-  startGame() {
+  startGame():void {
     try {
       // Check if user is logged in
       if (this.authService.isLoggedIn()) {
@@ -39,7 +39,7 @@ export class HeaderComponent implements OnInit {
     }
   }
 
-  logout() {
+  logout():void  {
     this.authService.logout();
     this.router.navigate(['/']);
   }

@@ -1,5 +1,5 @@
 export interface ISignInResponse {
-  access_token: string;
+  accessToken: string;
   user: {
     id: number;
     username: string;
@@ -8,7 +8,7 @@ export interface ISignInResponse {
 }
 
 export interface IAuthResponse {
-  access_token?: string;
+  accessToken?: string;
   message: string;
   user: {
     id: number;

@@ -6,8 +6,7 @@ import { GameService } from '../services/game.service';
 import { SocketService } from '../services/socket.service';
 import { RoomService } from '../services/room.service';
 import { Subscription } from 'rxjs';
-import { IRemoteGameState } from '../../interfaces/room.interfaces';
-
+import { IGameStateUpdate } from '../../interfaces/ludoboard.interfaces';
 @Component({
   selector: 'app-ludo-board',
   standalone: true,
@@ -36,7 +35,7 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
 
   isRolling = false;
 
-  ngOnInit() {
+  ngOnInit():void {
     // Subscribe to gameState changes
     const gameStateSubscription = this.gameService.gameState$.subscribe(
       (state) => {
@@ -59,7 +58,7 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
     this.subscriptions.push(gameStateSubscription, socketStateSubscription);
   }
 
-  ngOnDestroy() {
+  ngOnDestroy():void {
     this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 
@@ -69,7 +68,7 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
     toPos?: number,
   ): void {
     if (this.gameState) {
-      const updateData: any = {
+      const updateData:IGameStateUpdate = {
         currentTurn: this.gameState.currentTurn,
         diceValue: this.gameState.diceValue,
         pieces: this.gameState.pieces,
@@ -89,19 +88,9 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
         };
       }
 
-      this.socketService.sendGameStateUpdate(updateData);
+      // this.socketService.sendGameStateUpdate(updateData);
     }
   }
-
-  // triggerAnimations() {
-  //   if (!this.gameState) return;
-  //   this.gameState.movablePieces.forEach((pieceId) => {
-  //     const piece = this.gameService.pieces.find((p) => p.id === pieceId);
-  //     if (piece) {
-  //       console.log(`Animate piece ${piece.id} at position ${piece.position}`);
-  //     }
-  //   });
-  // }
 
   getCurrentPlayerName(): string {
     const currentColor = this.gameService.getCurrentPlayer();
@@ -115,10 +104,9 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
     return player?.playerName || currentColor;
   }
 
-  rollDice() {
+  rollDice():void {
     if (!this.gameState?.gameWon && this.isMyTurn()) {
       this.isRolling = true;
-      const rolledValue = this.gameService.rollDice();
       this.syncGameStateWithOthers();
 
       setTimeout(() => {
@@ -152,7 +140,7 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
     }
   }
 
-  async selectPiece(pieceId: string) {
+  async selectPiece(pieceId: string):Promise<void> {
     const myColor = this.gameService.getMyColor();
     const pieceColor = pieceId.split('_')[0];
 
@@ -204,7 +192,9 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
         p.position >= 0,
     );
 
-    if (samePosArray.length <= 1) return { x: 0, y: 0 };
+    if (samePosArray.length <= 1) {
+      return { x: 0, y: 0 };
+    }
 
     const index = samePosArray.findIndex((p) => p.id === piece.id);
     const offset = 8;
@@ -216,30 +206,30 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
     };
   }
 
-  IsRedTurn() {
+  IsRedTurn():boolean {
     return this.getCurrentPlayer().toLowerCase() === 'RED'.toLowerCase();
   }
-  IsBlueTurn() {
+  IsBlueTurn():boolean  {
     return this.getCurrentPlayer().toLowerCase() === 'BLUE'.toLowerCase();
   }
-  IsYellowTurn() {
+  IsYellowTurn():boolean  {
     return this.getCurrentPlayer().toLowerCase() === 'YELLOW'.toLowerCase();
   }
-  IsGreenTurn() {
+  IsGreenTurn() :boolean {
     return this.getCurrentPlayer().toLowerCase() === 'GREEN'.toLowerCase();
 
     // return this.gameService.isRedTurn();
   }
 
-  getVisiblePieces() {
+  getVisiblePieces():IPiece[] {
     return this.gameService.getVisiblePieces();
   }
 
-  getCurrentPlayer() {
+  getCurrentPlayer():string {
     return this.gameService.getCurrentPlayer();
   }
 
-  isGameWon() {
+  isGameWon():string | null {
     return this.gameService.gameState.gameWon;
   }
 
@@ -283,13 +273,15 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
     const col = index % 15;
 
     if (
-      (row == 9 && col <= 5 && col >= 0) ||
-      (row == 14 && col <= 5 && col >= 0) ||
-      (col == 0 && row >= 9 && row <= 15) ||
-      (col == 5 && row >= 9 && row <= 15)
-    )
+      (row === 9 && col <= 5 && col >= 0) ||
+      (row === 14 && col <= 5 && col >= 0) ||
+      (col === 0 && row >= 9 && row <= 15) ||
+      (col === 5 && row >= 9 && row <= 15)
+    ) {
       return true;
-    else return false;
+    } else {
+      return false;
+    }
   }
 
   isYellowBorder(index: number): boolean {
@@ -297,26 +289,30 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
     const col = index % 15;
 
     if (
-      (row == 9 && col >= 9) ||
-      (row == 14 && col >= 9) ||
-      (col == 9 && row >= 9) ||
-      (col == 14 && row >= 9)
-    )
+      (row === 9 && col >= 9) ||
+      (row === 14 && col >= 9) ||
+      (col === 9 && row >= 9) ||
+      (col === 14 && row >= 9)
+    ) {
       return true;
-    else return false;
+    } else {
+      return false;
+    }
   }
 
   isBlueBorder(index: number): boolean {
     const row = Math.floor(index / 15);
     const col = index % 15;
     if (
-      (row == 0 && col >= 0 && col <= 5) ||
-      (row == 5 && col >= 0 && col <= 5) ||
-      (col == 0 && row <= 5 && row >= 0) ||
-      (col == 5 && row <= 5 && row >= 0)
-    )
+      (row === 0 && col >= 0 && col <= 5) ||
+      (row === 5 && col >= 0 && col <= 5) ||
+      (col === 0 && row <= 5 && row >= 0) ||
+      (col === 5 && row <= 5 && row >= 0)
+    ) {
       return true;
-    else return false;
+    } else {
+      return false;
+    }
   }
 
   isGreenBorder(index: number): boolean {
@@ -324,13 +320,15 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
     const col = index % 15;
 
     if (
-      (row == 0 && col >= 9) ||
-      (row == 5 && col >= 9) ||
-      (col == 9 && row <= 5) ||
-      (col == 14 && row <= 5)
-    )
+      (row === 0 && col >= 9) ||
+      (row === 5 && col >= 9) ||
+      (col === 9 && row <= 5) ||
+      (col === 14 && row <= 5)
+    ) {
       return true;
-    else return false;
+    } else {
+      return false;
+    }
   }
 
   isSafeZone(index: number): boolean {
@@ -369,24 +367,26 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
     const col = index % 15;
 
     if (
-      (row === 10 && col == 1) ||
-      (row === 10 && col == 4) ||
-      (row === 13 && col == 1) ||
-      (row === 13 && col == 4) ||
-      (row === 1 && col == 1) ||
-      (row === 1 && col == 4) ||
-      (row === 4 && col == 1) ||
-      (row === 4 && col == 4) ||
-      (row === 1 && col == 10) ||
-      (row === 1 && col == 13) ||
-      (row === 4 && col == 10) ||
-      (row === 4 && col == 13) ||
-      (row === 10 && col == 10) ||
-      (row === 10 && col == 13) ||
-      (row === 13 && col == 10) ||
-      (row === 13 && col == 13)
-    )
+      (row === 10 && col === 1) ||
+      (row === 10 && col === 4) ||
+      (row === 13 && col === 1) ||
+      (row === 13 && col === 4) ||
+      (row === 1 && col === 1) ||
+      (row === 1 && col === 4) ||
+      (row === 4 && col === 1) ||
+      (row === 4 && col === 4) ||
+      (row === 1 && col === 10) ||
+      (row === 1 && col === 13) ||
+      (row === 4 && col === 10) ||
+      (row === 4 && col === 13) ||
+      (row === 10 && col === 10) ||
+      (row === 10 && col === 13) ||
+      (row === 13 && col === 10) ||
+      (row === 13 && col === 13)
+    ) {
       return true;
-    else return false;
+    } else {
+      return false;
+    }
   }
 }

@@ -59,37 +59,37 @@ export class SignupComponent {
   successMessage = '';
   isLoading = false;
 
-  get usernameInvalid() {
+  get usernameInvalid():boolean {
     return (
       this.form.controls.username.touched && this.form.controls.username.invalid
     );
   }
 
-  get emailInvalid() {
+  get emailInvalid():boolean {
     return this.form.controls.email.touched && this.form.controls.email.invalid;
   }
 
-  get passwordInvalid() {
+  get passwordInvalid():boolean {
     return (
       this.form.controls.password.touched && this.form.controls.password.invalid
     );
   }
 
-  get confirmPasswordInvalid() {
+  get confirmPasswordInvalid():boolean {
     return (
       this.form.controls.confirmPassword.touched &&
       this.form.controls.confirmPassword.invalid
     );
   }
 
-  get passwordMismatch() {
+  get passwordMismatch():boolean {
     return (
       this.form.hasError('passwordMismatch') &&
       this.form.controls.confirmPassword.touched
     );
   }
 
-  onSubmit() {
+  onSubmit():void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -120,7 +120,7 @@ export class SignupComponent {
     });
   }
 
-  onReset() {
+  onReset():void {
     this.form.reset();
     this.errorMessage = '';
     this.successMessage = '';

@@ -58,7 +58,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Get User Profile' })
   @ApiResponse({ status: 200, description: 'Profile Retrieved successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  getProfile(@Req() req) {
+  getProfile(@Req() req): void {
     return req.user;
   }
 }

@@ -6,14 +6,16 @@ export interface IPiece {
   currentY: number;
 }
 
+
 export interface IGameState {
   activePlayers: string[];
   currentTurn: number;
   diceValue: number;
   pieces: { [pieceId: string]: number };
-  // pieces:IPiece;
   gameWon: string | null;
   movablePieces: string[];
+  timestamp: Date;
+  room:string | null;
 }
 
 export interface IAvailableRoom {
@@ -22,4 +24,16 @@ export interface IAvailableRoom {
   maxPlayers: number;
   currentPlayers: number;
   gameStarted: boolean;
+}
+export interface IGameStateUpdate {
+  currentTurn: number;
+  diceValue: number;
+  pieces: { [pieceId: string]: number };
+  movablePieces: string[];
+  timestamp: Date;
+  lastMove?: {
+    pieceId: string;
+    fromPos: number;
+    toPos: number;
+  };
 }

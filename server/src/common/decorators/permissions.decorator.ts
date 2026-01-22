@@ -10,5 +10,7 @@ export enum Permission {
 }
 
 export const PERMISSIONS_KEY = 'permissions';
-export const UserPermissions = (...permissions: Permission[]) =>
+export const UserPermissions = (
+  ...permissions: Permission[]
+): MethodDecorator & ClassDecorator =>
   SetMetadata(PERMISSIONS_KEY, permissions);

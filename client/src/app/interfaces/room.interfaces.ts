@@ -1,4 +1,4 @@
-import { IGameState } from "./ludoboard.interfaces";
+import { IGameState } from './ludoboard.interfaces';
 
 export interface IRoomPlayer {
   socketId: string;

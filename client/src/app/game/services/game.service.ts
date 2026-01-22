@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IGameState, IPiece } from '../../interfaces/ludoboard.interfaces';
+import { IGameState, IGameStateUpdate, IPiece } from '../../interfaces/ludoboard.interfaces';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
@@ -7,12 +7,14 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class GameService {
   gameState: IGameState = {
+     room: null,   
     activePlayers: [],
     currentTurn: 0,
     diceValue: 0,
     pieces: {},
     gameWon: null,
     movablePieces: [],
+    timestamp: new Date,
   };
 
   private myColor: string = 'RED';
@@ -23,7 +25,7 @@ export class GameService {
   private gameStateSubject = new BehaviorSubject<IGameState>(this.gameState);
   gameState$ = this.gameStateSubject.asObservable();
   pieces: IPiece[] = [];
-  initPieces() {
+  initPieces(): void {
     //for active player use loop for each color and push to pieces array
 
     const newPieces: IPiece[] = [];
@@ -160,11 +162,11 @@ export class GameService {
     this.piecesSubject.next(newPieces);
   }
 
-  constructor() {
-    // this.initPieces();
-  }
-
-  startGame(playerCount: number, playerColors?: string[], myColor?: string) {
+  startGame(
+    playerCount: number,
+    playerColors?: string[],
+    myColor?: string,
+  ): void {
     if (playerColors && playerColors.length > 0) {
       this.gameState.activePlayers = playerColors;
       this.myColor = myColor || playerColors[0];
@@ -213,11 +215,15 @@ export class GameService {
     ['_0', '_1', '_2', '_3'].forEach((suffix) => {
       const pieceId = `${color}${suffix}`;
       const pos = this.gameState.pieces[pieceId];
-      if (pos === -999) return; // Hidden
+      if (pos === -999) {
+        return;
+      } // Hidden
 
       if (pos === -1 && dice === 6) {
         movable.push(pieceId);
-      } else if (pos >= 0 && pos + dice <= 56) movable.push(pieceId);
+      } else if (pos >= 0 && pos + dice <= 56) {
+        movable.push(pieceId);
+      }
     });
     return movable;
   }
@@ -270,8 +276,6 @@ export class GameService {
       await this.delay(400);
     }
 
-    const finalPos = startPos + steps;
-
     const killedSomeone = await this.checkCollisionsByCoordinates(
       pieceId,
       color,
@@ -308,7 +312,9 @@ export class GameService {
     movingColor: string,
   ): Promise<boolean> {
     const movingPiece = this.pieces.find((p) => p.id === movingPieceId);
-    if (!movingPiece) return false;
+    if (!movingPiece) {
+      return false;
+    }
 
     const movingPos = this.gameState.pieces[movingPieceId];
 
@@ -356,7 +362,9 @@ export class GameService {
     let killedSomeone = false;
 
     for (const pieceId of Object.keys(this.gameState.pieces)) {
-      if (pieceId === movingPieceId) continue;
+      if (pieceId === movingPieceId) {
+        continue;
+      }
 
       const opponentPos = this.gameState.pieces[pieceId];
       if (opponentPos === -1 || opponentPos >= 52) {
@@ -371,7 +379,9 @@ export class GameService {
       const opponentPath = this.getPathMap(opponentColor.toLowerCase());
       const opponentCell = opponentPath[opponentPos];
 
-      if (!opponentCell) continue;
+      if (!opponentCell) {
+        continue;
+      }
 
       // Comparing actual grid
       if (
@@ -392,7 +402,9 @@ export class GameService {
 
   private async sendPieceHome(pieceId: string): Promise<void> {
     const piece = this.pieces.find((p) => p.id === pieceId);
-    if (!piece) return;
+    if (!piece) {
+      return;
+    }
 
     const currentPos = this.gameState.pieces[pieceId];
     if (currentPos < 0) {
@@ -413,8 +425,10 @@ export class GameService {
     this.gameStateSubject.next({ ...this.gameState });
   }
 
-  async applyRemoteGameState(remoteState: any): Promise<void> {
-    if (!remoteState) return;
+  async applyRemoteGameState(remoteState: IGameStateUpdate): Promise<void> {
+    if (!remoteState) {
+      return;
+    }
 
     if (remoteState.lastMove && remoteState.lastMove.pieceId) {
       // Only animate, don't update other state yet
@@ -483,12 +497,14 @@ export class GameService {
     return this.myColor;
   }
 
-  private checkWin() {
+  private checkWin(): void {
     this.gameState.activePlayers.forEach((color) => {
       const allWon = ['_0', '_1', '_2', '_3'].every(
         (suffix) => this.gameState.pieces[`${color}${suffix}`] >= 58,
       );
-      if (allWon) this.gameState.gameWon = color;
+      if (allWon) {
+        this.gameState.gameWon = color;
+      }
     });
   }
 
@@ -507,9 +523,11 @@ export class GameService {
     }
   }
 
-  updatePiecePosition(pieceId: string, position: number) {
+  updatePiecePosition(pieceId: string, position: number): void {
     const piece = this.pieces.find((p) => p.id === pieceId);
-    if (!piece) return;
+    if (!piece) {
+      return;
+    }
 
     const path = this.getPathMap(piece.color);
     if (path[position]) {
@@ -529,7 +547,7 @@ export class GameService {
     return this.gameState.activePlayers[this.gameState.currentTurn] || '';
   }
 
-  private syncUiPieces() {
+  private syncUiPieces(): void {
     this.pieces = this.piecesSubject.value;
     const updated = this.pieces.map((p) => {
       const newPiece = { ...p };
@@ -554,7 +572,7 @@ export class GameService {
     this.piecesSubject.next(updated);
   }
 
-  private resetToHome(piece: IPiece) {
+  private resetToHome(piece: IPiece): void {
     const homePositions: { [key: string]: { x: number; y: number }[] } = {
       RED: [
         { x: 40, y: 400 },

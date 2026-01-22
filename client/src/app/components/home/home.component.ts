@@ -18,14 +18,14 @@ export class HomeComponent implements OnInit {
     private authService: AuthService,
   ) {}
 
-  ngOnInit() {
+  ngOnInit():void {
     this.authService.currentUser$.subscribe((user) => {
       this.isLoggedIn = !!user;
       this.username = user?.username || '';
     });
   }
 
-  startGame() {
+  startGame():void {
     try {
       // Check if user is logged in
       if (this.authService.isLoggedIn()) {

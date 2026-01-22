@@ -16,7 +16,7 @@ export class RoomConnectGenerateComponent {
     socketService.connect();
   }
 
-  playLocally() {
+  playLocally():void {
     this.router.navigateByUrl('game-setup');
   }
 }

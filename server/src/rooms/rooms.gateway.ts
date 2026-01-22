@@ -118,7 +118,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody()
     data: { roomId: string; playerName: string; socketId: string },
-  ) {
+  ): void {
     const room = this.rooms.get(data.roomId);
 
     if (!room) {
@@ -145,7 +145,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // Check if player is already in a room
     const existingRoom = this.playerRooms.get(client.id);
     if (existingRoom) {
-      this.handleLeaveRoom(client, { socketId: client.id });
+      this.handleLeaveRoom(client);
     }
 
     // Assign color
@@ -185,9 +185,9 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('leave-room')
   handleLeaveRoom(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: { socketId: string },
-  ) {
+    @ConnectedSocket()
+    client: Socket,
+  ): void {
     const roomId = this.playerRooms.get(client.id);
 
     if (!roomId) {
@@ -233,7 +233,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('get-rooms-list')
-  handleGetRoomsList(@ConnectedSocket() client: Socket) {
+  handleGetRoomsList(@ConnectedSocket() client: Socket): void {
     const availableRooms = Array.from(this.rooms.values()).filter(
       (room) => !room.gameStarted && room.currentPlayers < room.maxPlayers,
     );
@@ -244,10 +244,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('start-game')
-  handleStartGame(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: { socketId: string },
-  ) {
+  handleStartGame(@ConnectedSocket() client: Socket): void {
     const roomId = this.playerRooms.get(client.id);
 
     if (!roomId) {
@@ -293,8 +290,8 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('game-state-update')
   handleGameStateUpdate(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { socketId: string; gameState: any },
-  ) {
+    @MessageBody() data: { socketId: string; gameState: IGameRoom },
+  ): void {
     const roomId = this.playerRooms.get(client.id);
 
     if (!roomId) {
@@ -310,7 +307,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('newMessage')
-  handleNewMessage(@MessageBody() message: string) {
+  handleNewMessage(@MessageBody() message: string): void {
     this.server.emit('message', message);
   }
 

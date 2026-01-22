@@ -33,7 +33,7 @@ export class LoginComponent {
   errorMessage = '';
   isLoading = false;
 
-  get usernameInvalid() {
+  get usernameInvalid(): boolean {
     return (
       this.form.controls.username.touched &&
       this.form.controls.username.dirty &&
@@ -41,7 +41,7 @@ export class LoginComponent {
     );
   }
 
-  get passwordInvalid() {
+  get passwordInvalid(): boolean {
     return (
       this.form.controls.password.touched &&
       this.form.controls.password.dirty &&
@@ -49,7 +49,7 @@ export class LoginComponent {
     );
   }
 
-  OnSubmit() {
+  OnSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

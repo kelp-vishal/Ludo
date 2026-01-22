@@ -6,17 +6,16 @@ import { Router, NavigationEnd } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  standalone: true, 
-  imports: [RouterOutlet, HeaderComponent, NgIf], 
+  standalone: true,
+  imports: [RouterOutlet, HeaderComponent, NgIf],
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
-  showHeader =false;
+  showHeader = false;
 
   constructor(private router: Router) {
-
-    this.router.events.subscribe(event =>{
+    this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         const path = event.urlAfterRedirects.split('?')[0].split('#')[0];
         this.showHeader = path !== '/ludo-board';

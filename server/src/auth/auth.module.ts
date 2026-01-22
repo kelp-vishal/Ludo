@@ -1,4 +1,11 @@
-import { Module, ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Module,
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
@@ -13,9 +20,13 @@ class AllExceptionsFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const status =
-      exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+      exception instanceof HttpException
+        ? exception.getStatus()
+        : HttpStatus.INTERNAL_SERVER_ERROR;
     const message =
-      exception instanceof HttpException ? exception.getResponse() : { message: 'Internal server error' };
+      exception instanceof HttpException
+        ? exception.getResponse()
+        : { message: 'Internal server error' };
     response.status(status).json({
       statusCode: status,
       ...(typeof message === 'object' ? message : { message }),
@@ -27,15 +38,13 @@ class AllExceptionsFilter implements ExceptionFilter {
   imports: [
     UsersModule,
     JwtModule.register({
-      secret: jwtConstants.secret||process.env.JWT_SECRET || 'default_jwt_secret',
+      secret:
+        jwtConstants.secret || process.env.JWT_SECRET || 'default_jwt_secret',
       signOptions: { expiresIn: '1h' },
     }),
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    { provide: APP_GUARD, useClass: AuthGuard},
-  ],
+  providers: [AuthService, { provide: APP_GUARD, useClass: AuthGuard }],
   exports: [AuthService, JwtModule],
 })
 export class AuthModule {}

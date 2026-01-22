@@ -1,16 +1,13 @@
 /* You can add global styles to this file, and also import other style files */
 @import url("tailwindcss");
-header{
+header {
   padding: auto;
 }
 body {
   margin: 0;
-  font-family: 'Courier New', Courier, monospace;
-  /* background-image: linear-gradient(130deg, rgb(3, 119, 123), rgb(61, 76, 245)); */
+  font-family: "Courier New", Courier, monospace;
   background-image: linear-gradient(130deg, rgb(0, 96, 83), rgb(0, 0, 194));
-  /* background-image: linear-gradient(130px, rgb(5, 172, 190), rgb(12, 68, 151)); */
   color: #f0f0f0;
-  /* background-color: #035686; */
   font-size: large;
   font-weight: 500;
 }

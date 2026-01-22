@@ -1,20 +1,25 @@
-import { Injectable, UnauthorizedException, ConflictException,Logger } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+  Logger,
+} from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { ISignInResponse, IAuthResponse } from '../interfaces/auth.interfaces';
 
 @Injectable()
 export class AuthService {
-  private readonly logger= new Logger(AuthService.name);
-
+  private readonly logger = new Logger(AuthService.name);
   constructor(
     private userService: UsersService,
     private jwtService: JwtService,
   ) {}
 
-  async signIn(username: string, password: string): Promise<any> {
+  async signIn(username: string, password: string): Promise<ISignInResponse> {
     const user = await this.userService.findOne(username);
-    
+
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -26,7 +31,10 @@ export class AuthService {
     }
 
     return {
-      access_token: this.jwtService.sign({ sub: user.id, username: user.username }),
+      access_token: this.jwtService.sign({
+        sub: user.id,
+        username: user.username,
+      }),
       user: {
         id: user.id,
         username: user.username,
@@ -35,7 +43,11 @@ export class AuthService {
     };
   }
 
-  async register(username: string, password: string, email: string): Promise<any> {
+  async register(
+    username: string,
+    password: string,
+    email: string,
+  ): Promise<IAuthResponse> {
     // Check if user already exists
     const existingUser = await this.userService.findOne(username);
     if (existingUser) {
@@ -49,7 +61,11 @@ export class AuthService {
 
     // Hash password and create user
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await this.userService.createUser(username, hashedPassword, email);
+    const newUser = await this.userService.createUser(
+      username,
+      hashedPassword,
+      email,
+    );
 
     return {
       message: 'User registered successfully',
@@ -61,4 +77,3 @@ export class AuthService {
     };
   }
 }
-

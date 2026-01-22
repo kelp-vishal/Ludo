@@ -1,35 +1,38 @@
-
 <form [formGroup]="form" (ngSubmit)="OnSubmit()">
   <h2>Login</h2>
 
   <div class="control-row">
     <div class="control no-margin">
       <label for="username">Username</label>
-      <input id="username" type="text" formControlName="username"/>
+      <input id="username" type="text" formControlName="username" />
     </div>
 
     <div class="control no-margin">
       <label for="password">Password</label>
-      <input id="password" type="password" formControlName="password"/>
+      <input id="password" type="password" formControlName="password" />
     </div>
 
     <button class="button" type="submit" [disabled]="isLoading">
-      {{ isLoading ? 'Logging in...' : 'Login' }}
+      {{ isLoading ? "Logging in..." : "Login" }}
     </button>
   </div>
-  
-  @if(usernameInvalid){
-    <p class="control-error">Please enter a valid username (min 3 characters)</p>
+
+  @if (usernameInvalid) {
+    <p class="control-error">
+      Please enter a valid username (min 3 characters)
+    </p>
   }
 
-  @if(passwordInvalid){
-    <p class="control-error">Please enter a valid password (min 6 characters)</p>
+  @if (passwordInvalid) {
+    <p class="control-error">
+      Please enter a valid password (min 6 characters)
+    </p>
   }
 
-  @if(errorMessage){
+  @if (errorMessage) {
     <p class="control-error">{{ errorMessage }}</p>
   }
-  
+
   <p class="form-info loginsu">
     Don't have an account? <a routerLink="/signup">Sign up here</a>
   </p>

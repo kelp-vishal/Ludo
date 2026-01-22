@@ -1,6 +1,11 @@
-
 import { Component, DestroyRef, inject, OnInit } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { CommonModule } from '@angular/common';
@@ -10,7 +15,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  styleUrl: './login.component.css',
 })
 export class LoginComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
@@ -19,22 +24,30 @@ export class LoginComponent implements OnInit {
 
   form = new FormGroup({
     username: new FormControl('', {
-      validators: [Validators.required, Validators.minLength(3)]
+      validators: [Validators.required, Validators.minLength(3)],
     }),
     password: new FormControl('', {
-      validators: [Validators.required, Validators.minLength(6)]
-    })
+      validators: [Validators.required, Validators.minLength(6)],
+    }),
   });
 
   errorMessage = '';
   isLoading = false;
 
   get usernameInvalid() {
-    return this.form.controls.username.touched && this.form.controls.username.dirty && this.form.controls.username.invalid;
+    return (
+      this.form.controls.username.touched &&
+      this.form.controls.username.dirty &&
+      this.form.controls.username.invalid
+    );
   }
 
   get passwordInvalid() {
-    return this.form.controls.password.touched && this.form.controls.password.dirty && this.form.controls.password.invalid;
+    return (
+      this.form.controls.password.touched &&
+      this.form.controls.password.dirty &&
+      this.form.controls.password.invalid
+    );
   }
 
   OnSubmit() {
@@ -58,8 +71,9 @@ export class LoginComponent implements OnInit {
       error: (error) => {
         console.error('Login error:', error);
         this.isLoading = false;
-        this.errorMessage = error.error?.message || 'Login failed. Please try again.';
-      }
+        this.errorMessage =
+          error.error?.message || 'Login failed. Please try again.';
+      },
     });
   }
 

@@ -1,4 +1,3 @@
-
 <form [formGroup]="form" (ngSubmit)="onSubmit()">
   <h2>Welcome on board!</h2>
   <p>We just need a little bit of data from you to get you started</p>
@@ -6,7 +5,7 @@
   <div class="control">
     <label for="username">Username</label>
     <input id="username" type="text" formControlName="username" />
-    @if(usernameInvalid){
+    @if (usernameInvalid) {
       <p class="control-error">Username must be at least 3 characters</p>
     }
   </div>
@@ -14,7 +13,7 @@
   <div class="control">
     <label for="email">Email</label>
     <input id="email" type="email" formControlName="email" />
-    @if(emailInvalid){
+    @if (emailInvalid) {
       <p class="control-error">Please enter a valid email address</p>
     }
   </div>
@@ -23,35 +22,46 @@
     <div class="control">
       <label for="password">Password</label>
       <input id="password" type="password" formControlName="password" />
-      @if(passwordInvalid){
+      @if (passwordInvalid) {
         <p class="control-error">Password must be at least 6 characters</p>
       }
     </div>
 
     <div class="control">
       <label for="confirm-password">Confirm Password</label>
-      <input id="confirm-password" type="password" formControlName="confirmPassword" />
-      @if(confirmPasswordInvalid){
+      <input
+        id="confirm-password"
+        type="password"
+        formControlName="confirmPassword"
+      />
+      @if (confirmPasswordInvalid) {
         <p class="control-error">Please confirm your password</p>
       }
-      @if(passwordMismatch){
+      @if (passwordMismatch) {
         <p class="control-error">Passwords do not match</p>
       }
     </div>
   </div>
 
-  @if(errorMessage){
+  @if (errorMessage) {
     <p class="control-error">{{ errorMessage }}</p>
   }
 
-  @if(successMessage){
+  @if (successMessage) {
     <p class="control-success">{{ successMessage }}</p>
   }
 
   <p class="form-actions">
-    <button type="button" class="button button-flat" (click)="onReset()" [disabled]="isLoading">Reset</button>
+    <button
+      type="button"
+      class="button button-flat"
+      (click)="onReset()"
+      [disabled]="isLoading"
+    >
+      Reset
+    </button>
     <button type="submit" class="button" [disabled]="isLoading">
-      {{ isLoading ? 'Creating account...' : 'Sign up' }}
+      {{ isLoading ? "Creating account..." : "Sign up" }}
     </button>
   </p>
 

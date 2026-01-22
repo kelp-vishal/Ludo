@@ -18,9 +18,9 @@ import { RoomsGateway } from './rooms/rooms.gateway';
       type: 'postgres',
       host: process.env.DB_HOST || 'localhost',
       port: parseInt(process.env.DB_PORT) || 5432,
-      username: process.env.DB_USERNAME ||'postgres',
+      username: process.env.DB_USERNAME || 'postgres',
       password: process.env.DB_PASSWORD,
-      database: process.env.DB_DATABASE ,
+      database: process.env.DB_DATABASE,
       autoLoadEntities: true,
       synchronize: true,
     }),
@@ -32,4 +32,3 @@ import { RoomsGateway } from './rooms/rooms.gateway';
   providers: [AppService, RoomsGateway],
 })
 export class AppModule {}
-

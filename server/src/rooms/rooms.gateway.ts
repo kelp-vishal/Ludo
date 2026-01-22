@@ -1,18 +1,24 @@
-import { MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer, ConnectedSocket } from "@nestjs/websockets";
-import { Server, Socket } from "socket.io";
-import { IGameRoom } from "src/interfaces/roomsGateway.interfaces";
-import { Logger } from "@nestjs/common";
-
+import { Logger } from '@nestjs/common';
+import {
+  ConnectedSocket,
+  MessageBody,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+import { IGameRoom } from 'src/interfaces/roomsGateway.interfaces';
 
 @WebSocketGateway({
   path: '/socket.io',
   cors: {
     origin: '*',
-    method:['GET','POST'],
+    method: ['GET', 'POST'],
   },
   transports: ['polling', 'websocket'],
 })
-
 export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
 
@@ -21,18 +27,18 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   private rooms: Map<string, IGameRoom> = new Map();
   private playerRooms: Map<string, string> = new Map();
-  private roomColorIndex: Map<String ,number>=new Map();
+  private roomColorIndex: Map<string, number> = new Map();
   private colors = ['RED', 'GREEN', 'BLUE', 'YELLOW'];
 
-  handleConnection(client: Socket):void {
-   this.logger.log(`New user Connected :,${client.id}`);
+  handleConnection(client: Socket): void {
+    this.logger.log(`New user Connected :,${client.id}`);
     client.emit('connected', {
       socketId: client.id,
-      message: 'Connected successfully'
+      message: 'Connected successfully',
     });
   }
 
-  handleDisconnect(client: Socket):void {
+  handleDisconnect(client: Socket): void {
     this.logger.log(`User disconnected:, ${client.id}`);
 
     const roomId = this.playerRooms.get(client.id);
@@ -44,7 +50,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
 
-    room.players = room.players.filter(p => p.socketId !== client.id);
+    room.players = room.players.filter((p) => p.socketId !== client.id);
     room.currentPlayers = Math.max(0, room.currentPlayers - 1);
 
     if (room.currentPlayers === 0) {
@@ -63,15 +69,14 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     this.playerRooms.delete(client.id);
-}
-
+  }
 
   @SubscribeMessage('create-room')
   handleCreateRoom(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { playerCount: number;playerName: string;socketId:string }
-  ):void {
-
+    @MessageBody()
+    data: { playerCount: number; playerName: string; socketId: string },
+  ): void {
     // console.log(' vishal visshal')
     const roomId = this.generateRoomId();
     const room: IGameRoom = {
@@ -80,59 +85,60 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         {
           socketId: client.id,
           playerName: data.playerName,
-          color: 'RED'
-        }
+          color: 'RED',
+        },
       ],
       maxPlayers: data.playerCount,
-      currentPlayers:1,
+      currentPlayers: 1,
       gameStarted: false,
       hostSocketId: client.id,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     this.rooms.set(roomId, room);
     this.playerRooms.set(client.id, roomId);
 
-    this.roomColorIndex.set(roomId,1);
+    this.roomColorIndex.set(roomId, 1);
 
     client.join(roomId);
 
-    this.logger.log(`Room created: ${roomId} with host ${client.id}`)
+    this.logger.log(`Room created: ${roomId} with host ${client.id}`);
     client.emit('room-created', {
       room,
-      message: `Room created successfully with ID: ${roomId}`
+      message: `Room created successfully with ID: ${roomId}`,
     });
-    
+
     // Broadcast to all clients about new room
     this.server.emit('rooms-list', {
-      rooms: Array.from(this.rooms.values())
+      rooms: Array.from(this.rooms.values()),
     });
   }
 
   @SubscribeMessage('join-room')
   handleJoinRoom(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: {roomId: string;playerName: string; socketId: string }
+    @MessageBody()
+    data: { roomId: string; playerName: string; socketId: string },
   ) {
     const room = this.rooms.get(data.roomId);
 
     if (!room) {
       client.emit('room-error', {
-        message: `Room ${data.roomId} not found`
+        message: `Room ${data.roomId} not found`,
       });
       return;
     }
 
     if (room.gameStarted) {
       client.emit('room-error', {
-        message: 'Game has already started in this room'
+        message: 'Game has already started in this room',
       });
       return;
     }
 
     if (room.currentPlayers >= room.maxPlayers) {
       client.emit('room-error', {
-        message: `Room is full. Maximum players: ${room.maxPlayers}`
+        message: `Room is full. Maximum players: ${room.maxPlayers}`,
       });
       return;
     }
@@ -146,12 +152,12 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // Assign color
     const currentColorIndex = this.roomColorIndex.get(data.roomId) || 0;
     const color = this.colors[currentColorIndex % this.colors.length];
-    this.roomColorIndex.set(data.roomId,currentColorIndex+1);
+    this.roomColorIndex.set(data.roomId, currentColorIndex + 1);
 
     room.players.push({
       socketId: client.id,
       playerName: data.playerName,
-      color
+      color,
     });
     room.currentPlayers++;
 
@@ -163,7 +169,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // Notify the joining player
     client.emit('room-joined', {
       room,
-      message: `Successfully joined room ${data.roomId}`
+      message: `Successfully joined room ${data.roomId}`,
     });
 
     // Notify others in the room
@@ -171,32 +177,32 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       roomId: data.roomId,
       room,
       message: `${data.playerName} (${client.id}) joined the room`,
-      socketId: client.id
+      socketId: client.id,
     });
 
     // Broadcast updated rooms list
     this.server.emit('rooms-list', {
-      rooms: Array.from(this.rooms.values())
+      rooms: Array.from(this.rooms.values()),
     });
   }
 
   @SubscribeMessage('leave-room')
   handleLeaveRoom(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { socketId: string }
+    @MessageBody() data: { socketId: string },
   ) {
     const roomId = this.playerRooms.get(client.id);
 
     if (!roomId) {
       client.emit('room-error', {
-        message: 'You are not in any room'
+        message: 'You are not in any room',
       });
       return;
     }
 
     const room = this.rooms.get(roomId);
     if (room) {
-      room.players = room.players.filter(p => p.socketId !== client.id);
+      room.players = room.players.filter((p) => p.socketId !== client.id);
       room.currentPlayers--;
 
       this.logger.log(`Player ${client.id} left room ${roomId}`);
@@ -215,7 +221,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           roomId,
           room,
           message: `Player ${client.id} left the room`,
-          socketId: client.id
+          socketId: client.id,
         });
       }
     }
@@ -225,31 +231,31 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // Broadcast updated rooms list
     this.server.emit('rooms-list', {
-      rooms: Array.from(this.rooms.values())
+      rooms: Array.from(this.rooms.values()),
     });
   }
 
   @SubscribeMessage('get-rooms-list')
   handleGetRoomsList(@ConnectedSocket() client: Socket) {
     const availableRooms = Array.from(this.rooms.values()).filter(
-      room => !room.gameStarted && room.currentPlayers < room.maxPlayers
+      (room) => !room.gameStarted && room.currentPlayers < room.maxPlayers,
     );
 
     client.emit('rooms-list', {
-      rooms: availableRooms
+      rooms: availableRooms,
     });
   }
 
   @SubscribeMessage('start-game')
   handleStartGame(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { socketId: string }
+    @MessageBody() data: { socketId: string },
   ) {
     const roomId = this.playerRooms.get(client.id);
 
     if (!roomId) {
       client.emit('room-error', {
-        message: 'You are not in any room'
+        message: 'You are not in any room',
       });
       return;
     }
@@ -257,7 +263,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const room = this.rooms.get(roomId);
     if (!room) {
       client.emit('room-error', {
-        message: 'Room not found'
+        message: 'Room not found',
       });
       return;
     }
@@ -265,32 +271,32 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // Only host can start the game
     if (room.hostSocketId !== client.id) {
       client.emit('room-error', {
-        message: 'Only the room host can start the game'
+        message: 'Only the room host can start the game',
       });
       return;
     }
 
     room.gameStarted = true;
 
-   this.logger.log(`Game started in room ${roomId}`);
+    this.logger.log(`Game started in room ${roomId}`);
 
     // Notify all players in the room
     this.server.to(roomId).emit('game-started', {
       room,
       message: `Game started with ${room.currentPlayers} players`,
-      players: room.players
+      players: room.players,
     });
 
     // Broadcast updated rooms list
     this.server.emit('rooms-list', {
-      rooms: Array.from(this.rooms.values())
+      rooms: Array.from(this.rooms.values()),
     });
   }
 
   @SubscribeMessage('game-state-update')
   handleGameStateUpdate(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { socketId: string; gameState: any }
+    @MessageBody() data: { socketId: string; gameState: any },
   ) {
     const roomId = this.playerRooms.get(client.id);
 
@@ -302,7 +308,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(roomId).emit('game-state-update', {
       gameState: data.gameState,
       updatedBy: client.id,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 

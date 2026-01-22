@@ -1,4 +1,3 @@
-
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../identity/services/auth.service';
@@ -8,7 +7,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-header',
   imports: [CommonModule],
   templateUrl: './header.component.html',
-  styleUrl: './header.component.css'
+  styleUrl: './header.component.css',
 })
 export class HeaderComponent implements OnInit {
   isLoggedIn = false;
@@ -16,12 +15,12 @@ export class HeaderComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
   ) {}
 
   ngOnInit() {
     // Subscribe to authentication status
-    this.authService.currentUser$.subscribe(user => {
+    this.authService.currentUser$.subscribe((user) => {
       this.isLoggedIn = !!user;
       this.username = user?.username || '';
     });
@@ -31,14 +30,14 @@ export class HeaderComponent implements OnInit {
     try {
       // Check if user is logged in
       if (this.authService.isLoggedIn()) {
-        console.log("User is authenticated, redirecting to game setup");
+        console.log('User is authenticated, redirecting to game setup');
         this.router.navigate(['/game-setup']);
       } else {
-        console.log("User not authenticated, redirecting to login");
+        console.log('User not authenticated, redirecting to login');
         this.router.navigate(['/signup']);
       }
     } catch (error) {
-      console.error("Error starting the game:", error);
+      console.error('Error starting the game:', error);
     }
   }
 

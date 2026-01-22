@@ -1,4 +1,3 @@
-
 import { IsNumber, IsString, Min, Max, IsNotEmpty } from 'class-validator';
 
 export class CreateRoomDto {

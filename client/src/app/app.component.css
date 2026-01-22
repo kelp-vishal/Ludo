@@ -1,12 +1,11 @@
 .app-content {
-    /* margin-left: 100px; */
-    /* padding: 20px; */
-    min-height: 100vh;
+  /* margin-left: 100px; */
+  /* padding: 20px; */
+  min-height: 100vh;
 }
-:root{
-    background-color: aqua;
+:root {
+  background-color: aqua;
 }
-
 
 form {
   width: 90%;

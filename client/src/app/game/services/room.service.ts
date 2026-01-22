@@ -1,7 +1,6 @@
-
 import { Injectable } from '@angular/core';
 import { SocketService } from './socket.service';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { IRoomPlayer } from '../../interfaces/room.interfaces';
 
 export interface GameRoom {
@@ -10,11 +9,11 @@ export interface GameRoom {
   maxPlayers: number;
   currentPlayers: number;
   gameStarted: boolean;
-  hostSocketId?: string;
+  hostSocketId: string;
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class RoomService {
   private currentRoomSubject = new BehaviorSubject<GameRoom | null>(null);
@@ -32,23 +31,22 @@ export class RoomService {
   }
 
   private setupSocketListeners(): void {
-    this.socketService.currentRoom$.subscribe(room => {
+    this.socketService.currentRoom$.subscribe((room) => {
       this.currentRoomSubject.next(room as GameRoom | null);
     });
 
-    this.socketService.playersInRoom$.subscribe(players => {
+    this.socketService.playersInRoom$.subscribe((players) => {
       this.playersSubject.next(players as IRoomPlayer[]);
     });
 
-    this.socketService.rooms$.subscribe(rooms => {
+    this.socketService.rooms$.subscribe((rooms) => {
       this.availableRoomsSubject.next(rooms as GameRoom[]);
     });
   }
 
   createRoom(playerCount: number, playerName: string = 'Player'): void {
-    console.log("Vishal");
+    console.log('Vishal');
     this.socketService.createRoom(playerCount, playerName);
-
   }
 
   joinRoom(roomId: string, playerName: string = 'Player'): void {

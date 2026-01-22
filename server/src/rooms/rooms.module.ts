@@ -2,6 +2,6 @@ import { Module } from '@nestjs/common';
 import { RoomsGateway } from './rooms.gateway';
 
 @Module({
-    providers:[RoomsGateway]
+  providers: [RoomsGateway],
 })
 export class RoomsModule {}

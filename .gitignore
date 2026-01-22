@@ -1,0 +1,138 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Database configuration files (contains credentials)
+server/config/config.json
+config/config.json
+**/config/config.json
+database.config.json
+db-config.json
+
+# JWT secrets and keys
+jwt.key
+*.key
+*.pem
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+
+# Angular specific
+.angular/
+.nx/cache/
+
+# NestJS specific
+coverage/
+*.tsbuildinfo
+
+# Database
+
+*.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# TypeScript
+*.js.map
+*.d.ts.map
+
+# Testing
+coverage/
+.nyc_output/
+junit.xml
+
+# Docker
+.dockerignore
+
+# Temporary files
+tmp/
+temp/
+
+# Database migration documentation
+DATABASE_MIGRATIONS.md
+database_migrations.md
+DATABASE_INTEGRATION_WORKFLOW.md
+
+
+# Editor backups
+*~
+*.backup
+*.bak
+*.orig
+
+
+# Additional security and config files
+config.json
+secrets.json
+.secrets
+
+# Any file containing credentials or sensitive data
+*credentials*
+*secrets*
+*password*
+*.private
+*.confidential
+
+# Local development files
+local.json
+dev.json
+development.json
+
+# Database connection files
+database.config.local.js
+db.config.local.js
+
+# Development caches
+.eslintcache
+.cache/
+
+# Cloud provider configs
+.aws/
+.gcp/
+
+# Terraform files
+*.tfstate
+*.tfstate.backup
+.terraform/
+
+# Misc files
+*.tgz
+*.tar.gz
+.history/

@@ -1,13 +1,13 @@
-
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { IRoom } from '../../interfaces/socket.interfaces';
 import { environment } from '../../../environments/environment';
+import { IGameState } from '../../interfaces/ludoboard.interfaces';
+import { IRemoteGameState } from '../../interfaces/room.interfaces';
 
 @Injectable({ providedIn: 'root' })
 export class SocketService {
-
   Room: IRoom[] = [];
 
   private socket: Socket | null = null;
@@ -15,9 +15,14 @@ export class SocketService {
   private socketIdSubject = new BehaviorSubject<string>('');
   private roomsSubject = new BehaviorSubject<IRoom[]>([]);
   private currentRoomSubject = new BehaviorSubject<IRoom | null>(null);
-  private playersInRoomSubject = new BehaviorSubject<Array<{ socketId: string; color?: string }>>([]);
-  private gameStateSubject = new BehaviorSubject<any>(null);
+  private playersInRoomSubject = new BehaviorSubject<
+    Array<{ socketId: string; color?: string }>
+  >([]);
+  private gameStateSubject = new BehaviorSubject<IGameState | null>(null);
   private gameStartedSubject = new BehaviorSubject<any>(null);
+  private remoteGameStateSubject = new BehaviorSubject<IRemoteGameState | null>(null);
+  remoteGameState$ = this.remoteGameStateSubject.asObservable();
+
 
   connected$ = this.connectedSubject.asObservable();
   socketId$ = this.socketIdSubject.asObservable();
@@ -45,7 +50,6 @@ export class SocketService {
       reconnectionDelayMax: 5000,
       reconnectionAttempts: 5,
     });
-
 
     this.socket.on('connect', () => {
       console.log('Connected to WebSocket server');
@@ -75,11 +79,14 @@ export class SocketService {
       this.playersInRoomSubject.next(data.room.players);
     });
 
-    this.socket.on('player-joined', (data: { room: IRoom; message: string }) => {
-      console.log('Player joined room:', data.message);
-      this.currentRoomSubject.next(data.room);
-      this.playersInRoomSubject.next(data.room.players);
-    });
+    this.socket.on(
+      'player-joined',
+      (data: { room: IRoom; message: string }) => {
+        console.log('Player joined room:', data.message);
+        this.currentRoomSubject.next(data.room);
+        this.playersInRoomSubject.next(data.room.players);
+      },
+    );
 
     this.socket.on('player-left', (data: { room: IRoom; message: string }) => {
       console.log('Player left room:', data.message);
@@ -94,16 +101,17 @@ export class SocketService {
       this.roomsSubject.next(data.rooms);
     });
 
-    this.socket.on('game-started', (data: { room: IRoom; message: string; players: any }) => {
-      console.log('Game started:', data.message);
-      this.currentRoomSubject.next(data.room);
+    this.socket.on(
+      'game-started',
+      (data: IGameState) => {
+        // this.currentRoomSubject.next(data.room);
+        this.gameStartedSubject.next(data);
+      },
+    );
 
-      this.gameStartedSubject.next(data);
-    });
-
-    this.socket.on('game-state-update', (data: any) => {
+    this.socket.on('game-state-update', (data: IRemoteGameState) => {
       console.log('Game state updated:', data);
-      this.gameStateSubject.next(data);
+      this.remoteGameStateSubject.next(data);
     });
 
     this.socket.on('room-error', (data: { message: string }) => {
@@ -113,11 +121,11 @@ export class SocketService {
 
   createRoom(playerCount: number, playerName: string = 'Player'): void {
     if (this.socket) {
-      console.log("Socket service ts")
+      console.log('Socket service ts');
       this.socket.emit('create-room', {
         playerCount,
         playerName,
-        socketId: this.socket.id
+        socketId: this.socket.id,
       });
     }
   }
@@ -127,7 +135,7 @@ export class SocketService {
       this.socket.emit('join-room', {
         roomId,
         playerName,
-        socketId: this.socket.id
+        socketId: this.socket.id,
       });
     }
   }
@@ -135,7 +143,7 @@ export class SocketService {
   leaveRoom(): void {
     if (this.socket) {
       this.socket.emit('leave-room', {
-        socketId: this.socket.id
+        socketId: this.socket.id,
       });
       this.currentRoomSubject.next(null);
       this.playersInRoomSubject.next([]);
@@ -145,7 +153,7 @@ export class SocketService {
   startGame(): void {
     if (this.socket) {
       this.socket.emit('start-game', {
-        socketId: this.socket.id
+        socketId: this.socket.id,
       });
     }
   }
@@ -160,7 +168,7 @@ export class SocketService {
     if (this.socket) {
       this.socket.emit('game-state-update', {
         socketId: this.socket.id,
-        gameState
+        gameState,
       });
     }
   }

@@ -1,4 +1,3 @@
-
 import { SetMetadata } from '@nestjs/common';
 
 export enum Permission {
@@ -10,6 +9,6 @@ export enum Permission {
   ROOM_MANAGE = 'room:manage',
 }
 
-export const PERMISSIONS_KEY ='permissions';
+export const PERMISSIONS_KEY = 'permissions';
 export const UserPermissions = (...permissions: Permission[]) =>
-  SetMetadata(PERMISSIONS_KEY,permissions);
+  SetMetadata(PERMISSIONS_KEY, permissions);

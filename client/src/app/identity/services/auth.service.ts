@@ -3,18 +3,19 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import {IUser,ILoginResponse,IRegisterResponse} from '../../interfaces/auth.interfaces';
- 
+import {
+  IUser,
+  ILoginResponse,
+  IRegisterResponse,
+} from '../../interfaces/auth.interfaces';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
-
-  User :IUser[] =[];
-  LoginResponse :ILoginResponse[]=[];
-  RegisterResponse:IRegisterResponse[] =[];
-
+  User: IUser[] = [];
+  LoginResponse: ILoginResponse[] = [];
+  RegisterResponse: IRegisterResponse[] = [];
 
   // private apiUrl = 'http://localhost:3002/auth';
   private apiUrl = 'https://f1vbcpxc-3002.inc1.devtunnels.ms/auth';
@@ -24,10 +25,10 @@ export class AuthService {
 
   constructor(
     private http: HttpClient,
-    @Inject(PLATFORM_ID) platformId: Object
+    @Inject(PLATFORM_ID) platformId: Object,
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
-    
+
     // Load user from localStorage if exists (only in browser)
     if (this.isBrowser) {
       const user = localStorage.getItem('currentUser');
@@ -38,20 +39,29 @@ export class AuthService {
   }
 
   login(username: string, password: string): Observable<ILoginResponse> {
-    return this.http.post<ILoginResponse>(`${this.apiUrl}/login`, { username, password })
+    return this.http
+      .post<ILoginResponse>(`${this.apiUrl}/login`, { username, password })
       .pipe(
-        tap(response => {
+        tap((response) => {
           if (this.isBrowser) {
             localStorage.setItem('access_token', response.access_token);
             localStorage.setItem('currentUser', JSON.stringify(response.user));
           }
           this.currentUserSubject.next(response.user);
-        })
+        }),
       );
   }
 
-  register(username: string, email: string, password: string): Observable<IRegisterResponse> {
-    return this.http.post<IRegisterResponse>(`${this.apiUrl}/register`, { username, email, password });
+  register(
+    username: string,
+    email: string,
+    password: string,
+  ): Observable<IRegisterResponse> {
+    return this.http.post<IRegisterResponse>(`${this.apiUrl}/register`, {
+      username,
+      email,
+      password,
+    });
   }
 
   logout(): void {
@@ -73,5 +83,3 @@ export class AuthService {
     return !!localStorage.getItem('access_token');
   }
 }
-
-

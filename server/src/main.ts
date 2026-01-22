@@ -1,4 +1,3 @@
-
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe, Logger } from '@nestjs/common';
@@ -25,7 +24,7 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors({
-    origin: [frontendLocal,frontendTunnel],
+    origin: [frontendLocal, frontendTunnel],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
@@ -48,7 +47,3 @@ async function bootstrap() {
   logger.log(`Swagger documentation available at: ${port} /api/doc`);
 }
 bootstrap();
-
-
-
-

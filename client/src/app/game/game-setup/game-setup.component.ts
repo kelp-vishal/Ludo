@@ -1,14 +1,12 @@
-
 import { Component, OnInit } from '@angular/core';
 import { GameService } from '../services/game.service';
-import { RoomService,GameRoom } from '../services/room.service';
+import { RoomService, GameRoom } from '../services/room.service';
 import { SocketService } from '../services/socket.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { IAvailableRoom } from '../../interfaces/ludoboard.interfaces';
-
 
 @Component({
   selector: 'app-game-setup',
@@ -18,8 +16,7 @@ import { IAvailableRoom } from '../../interfaces/ludoboard.interfaces';
   styleUrls: ['./game-setup.component.css'],
 })
 export class GameSetupComponent implements OnInit {
-
-  AvailableRoom : IAvailableRoom[]=[];
+  AvailableRoom: IAvailableRoom[] = [];
   selectedPlayerCount: number = 2;
   playerName: string = '';
   view: 'menu' | 'create' | 'join' = 'menu';
@@ -27,20 +24,19 @@ export class GameSetupComponent implements OnInit {
   selectedRoomId: string = '';
   isSocketConnected: boolean = false;
   socketId: string = '';
-  currentRoom$! : Observable<GameRoom| null>;
+  currentRoom$!: Observable<GameRoom | null>;
 
   constructor(
     private gameService: GameService,
     private roomService: RoomService,
     private socketService: SocketService,
-    public router: Router
-  ) { }
+    public router: Router,
+  ) {}
 
   ngOnInit(): void {
-
     this.currentRoom$ = this.roomService.currentRoom$;
     // Checking socket connectin
-    this.socketService.connected$.subscribe(connected => {
+    this.socketService.connected$.subscribe((connected) => {
       this.isSocketConnected = connected;
       if (connected) {
         console.log('Socket connected in game-setup');
@@ -48,40 +44,45 @@ export class GameSetupComponent implements OnInit {
     });
 
     // Get socket ID
-    this.socketService.socketId$.subscribe(id => {
+    this.socketService.socketId$.subscribe((id) => {
       this.socketId = id;
       console.log('Socket ID:', id);
     });
 
     // Listen for room updates
-    this.roomService.currentRoom$.subscribe(room => {
+    this.roomService.currentRoom$.subscribe((room) => {
       if (room) {
         console.log('Joined room:', room);
       }
     });
 
-    this.socketService.gameStarted$.subscribe(data=> {
-      if(data && data.room){
-
-        const currentRoom=data.room;
+    this.socketService.gameStarted$.subscribe((data) => {
+      if (data && data.room) {
+        const currentRoom = data.room;
 
         const TURN_ORDER = ['RED', 'BLUE', 'GREEN', 'YELLOW'];
-        const joinedColors = currentRoom.players.map((p: any) => p.color);
-        const playerColors = TURN_ORDER.filter(c =>
-          joinedColors.includes(c)
+        const joinedColors = currentRoom.players.map(
+          (p: { color: string }) => p.color,
         );
-        // const playerColors =currentRoom.players.map((p:any) => p.color || 'RED');
-        const myColor = currentRoom.players.find((p:any) => p.socketId === this.socketId) ?.color|| 'RED';
-        this.gameService.startGame(currentRoom.currentPlayers,playerColors,myColor);
+        const playerColors = TURN_ORDER.filter((c) => joinedColors.includes(c));
+        const myColor =
+          currentRoom.players.find(
+            (p: { socketId: string }) => p.socketId === this.socketId,
+          )?.color || 'RED';
+        this.gameService.startGame(
+          currentRoom.currentPlayers,
+          playerColors,
+          myColor,
+        );
 
         this.router.navigate(['/ludo-board']);
       }
-    })
+    });
 
     //available rooms
     this.roomService.getRoomsList();
 
-    this.roomService.availableRooms$.subscribe(rooms => {
+    this.roomService.availableRooms$.subscribe((rooms) => {
       this.availableRooms = rooms;
       console.log('Available rooms:', rooms);
     });
@@ -112,7 +113,9 @@ export class GameSetupComponent implements OnInit {
     }
     // console.log('Vishal vishal');
 
-    console.log(`Creating room for ${this.selectedPlayerCount} players...${this.playerName}`);
+    console.log(
+      `Creating room for ${this.selectedPlayerCount} players...${this.playerName}`,
+    );
     this.roomService.createRoom(this.selectedPlayerCount, this.playerName);
   }
 
@@ -139,7 +142,7 @@ export class GameSetupComponent implements OnInit {
     }
 
     console.log('Host Starting game in room:', currentRoom.roomId);
-    
+
     this.roomService.startGame();
     // this.router.navigate(['/ludo-board']);
   }
@@ -149,12 +152,7 @@ export class GameSetupComponent implements OnInit {
     this.showCreateRoom();
   }
 
-  isHost(room:any):boolean
-  {
+  isHost(room:{hostSocketId:string}): boolean {
     return room?.hostSocketId === this.socketId;
   }
 }
-
-
-
-

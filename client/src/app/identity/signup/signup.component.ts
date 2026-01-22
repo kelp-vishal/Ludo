@@ -106,11 +106,12 @@ export class SignupComponent {
     this.authService.register(username, email, password).subscribe({
       next: (response) => {
         this.isLoading = false;
+
         this.successMessage =
           'Account created successfully! Redirecting to login...';
         setTimeout(() => {
           this.router.navigate(['/login']);
-        }, 2000);
+        }, 1500);
       },
       error: (error) => {
         this.isLoading = false;

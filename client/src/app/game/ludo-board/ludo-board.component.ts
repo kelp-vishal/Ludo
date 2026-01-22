@@ -88,7 +88,7 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
         };
       }
 
-      // this.socketService.sendGameStateUpdate(updateData);
+      this.socketService.sendGameStateUpdate(this.gameState);
     }
   }
 
@@ -108,6 +108,9 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
     if (!this.gameState?.gameWon && this.isMyTurn()) {
       this.isRolling = true;
       this.syncGameStateWithOthers();
+
+      const diceValue = this.gameService.rollDice();
+      this.valueDice.set(diceValue);
 
       setTimeout(() => {
         this.isRolling = false;

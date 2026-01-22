@@ -6,7 +6,10 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
-import { IAvailableRoom, IGameState } from '../../interfaces/ludoboard.interfaces';
+import {
+  IAvailableRoom,
+  IGameState,
+} from '../../interfaces/ludoboard.interfaces';
 
 @Component({
   selector: 'app-game-setup',
@@ -46,26 +49,28 @@ export class GameSetupComponent implements OnInit {
     });
 
     this.socketService.gameStarted$.subscribe((data) => {
-      if (data && data.room) {
-        const currentRoom = data.room; 
+      if (!data) return;
 
-        const TURN_ORDER = ['RED', 'BLUE', 'GREEN', 'YELLOW'];
-        const joinedColors = currentRoom.players.map(
-          (p: { color: string }) => p.color,
-        );
-        const playerColors = TURN_ORDER.filter((c) => joinedColors.includes(c));
-        const myColor =
-          currentRoom.players.find(
-            (p: { socketId: string }) => p.socketId === this.socketId,
-          )?.color || 'RED';
-        this.gameService.startGame(
-          currentRoom.currentPlayers,
-          playerColors,
-          myColor,
-        );
+      const currentRoom = this.roomService.getCurrentRoom();
 
-        this.router.navigate(['/ludo-board']);
-      }
+      if (!currentRoom) return;
+
+      const TURN_ORDER = ['RED', 'BLUE', 'GREEN', 'YELLOW'];
+
+      const joinedColors = currentRoom.players
+        .map((p) => p.color)
+        .filter((color): color is string => color !== undefined);
+      const playerColors = TURN_ORDER.filter((c) => joinedColors.includes(c));
+      const myColor =
+        currentRoom.players.find((p) => p.socketId === this.socketId)?.color ||
+        'RED';
+      this.gameService.startGame(
+        currentRoom.currentPlayers,
+        playerColors,
+        myColor,
+      );
+
+      this.router.navigate(['/ludo-board']);
     });
 
     //available rooms

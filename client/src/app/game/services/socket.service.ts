@@ -92,7 +92,6 @@ export class SocketService {
     });
 
     this.socket.on('game-started', (data: IGameState) => {
-      // this.currentRoomSubject.next(data.room);
       this.gameStartedSubject.next(data);
     });
 

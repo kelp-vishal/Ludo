@@ -7,6 +7,7 @@ import { SocketService } from '../services/socket.service';
 import { RoomService } from '../services/room.service';
 import { Subscription } from 'rxjs';
 import { IGameStateUpdate } from '../../interfaces/ludoboard.interfaces';
+
 @Component({
   selector: 'app-ludo-board',
   standalone: true,
@@ -16,7 +17,6 @@ import { IGameStateUpdate } from '../../interfaces/ludoboard.interfaces';
 })
 export class LudoBoardComponent implements OnInit, OnDestroy {
   Math = Math;
-  turnOrder = ['RED', 'BLUE', 'GREEN', 'YELLOW'];
   valueDice = signal(1);
 
   pieces: IPiece[] = [];
@@ -35,12 +35,11 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
 
   isRolling = false;
 
-  ngOnInit():void {
+  ngOnInit(): void {
     // Subscribe to gameState changes
     const gameStateSubscription = this.gameService.gameState$.subscribe(
       (state) => {
         this.gameState = state;
-        // this.triggerAnimations();
       },
     );
 
@@ -58,7 +57,7 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
     this.subscriptions.push(gameStateSubscription, socketStateSubscription);
   }
 
-  ngOnDestroy():void {
+  ngOnDestroy(): void {
     this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 
@@ -68,7 +67,7 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
     toPos?: number,
   ): void {
     if (this.gameState) {
-      const updateData:IGameStateUpdate = {
+      const updateData: IGameStateUpdate = {
         currentTurn: this.gameState.currentTurn,
         diceValue: this.gameState.diceValue,
         pieces: this.gameState.pieces,
@@ -104,7 +103,7 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
     return player?.playerName || currentColor;
   }
 
-  rollDice():void {
+  rollDice(): void {
     if (!this.gameState?.gameWon && this.isMyTurn()) {
       this.isRolling = true;
       this.syncGameStateWithOthers();
@@ -117,7 +116,6 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
 
         // Check if  no movable pieces
         if (this.gameState?.movablePieces?.length === 0) {
-          // setTimeout(() => {
           if (this.gameState) {
             this.gameState.diceValue = 0;
             this.gameState.currentTurn =
@@ -126,7 +124,6 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
             this.gameService.updateGameState(this.gameState);
             this.syncGameStateWithOthers();
           }
-          // }, 1000);
         } else {
           // Normal case
 
@@ -143,7 +140,7 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
     }
   }
 
-  async selectPiece(pieceId: string):Promise<void> {
+  async selectPiece(pieceId: string): Promise<void> {
     const myColor = this.gameService.getMyColor();
     const pieceColor = pieceId.split('_')[0];
 
@@ -209,30 +206,30 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
     };
   }
 
-  IsRedTurn():boolean {
+  IsRedTurn(): boolean {
     return this.getCurrentPlayer().toLowerCase() === 'RED'.toLowerCase();
   }
-  IsBlueTurn():boolean  {
+  IsBlueTurn(): boolean {
     return this.getCurrentPlayer().toLowerCase() === 'BLUE'.toLowerCase();
   }
-  IsYellowTurn():boolean  {
+  IsYellowTurn(): boolean {
     return this.getCurrentPlayer().toLowerCase() === 'YELLOW'.toLowerCase();
   }
-  IsGreenTurn() :boolean {
+  IsGreenTurn(): boolean {
     return this.getCurrentPlayer().toLowerCase() === 'GREEN'.toLowerCase();
 
     // return this.gameService.isRedTurn();
   }
 
-  getVisiblePieces():IPiece[] {
+  getVisiblePieces(): IPiece[] {
     return this.gameService.getVisiblePieces();
   }
 
-  getCurrentPlayer():string {
+  getCurrentPlayer(): string {
     return this.gameService.getCurrentPlayer();
   }
 
-  isGameWon():string | null {
+  isGameWon(): string | null {
     return this.gameService.gameState.gameWon;
   }
 
@@ -339,10 +336,6 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
     return safeIndices.includes(index);
   }
 
-  // isStartZone(index: number): boolean {
-  //   const startIndices = [201, 23, 91, 133];
-  //   return startIndices.includes(index);
-  // }
   isFinishZone(index: number): boolean {
     const finishIndices = [96, 97, 98, 111, 113, 112, 128, 127, 126];
     return finishIndices.includes(index);

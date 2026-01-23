@@ -1,21 +1,39 @@
 import { Injectable } from '@angular/core';
-import { IGameState, IGameStateUpdate, IPiece } from '../../interfaces/ludoboard.interfaces';
+import {
+  IGameState,
+  IGameStateUpdate,
+  IPiece,
+} from '../../interfaces/ludoboard.interfaces';
 import { BehaviorSubject } from 'rxjs';
+import { TurnOrder } from '../../common/enum/turn-order.enum';
+import {
+  PathArrayBLUE,
+  PathArrayGREEN,
+  PathArrayRED,
+  PathArrayYELLOW,
+} from '../../common/constants/game.constants';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GameService {
   gameState: IGameState = {
-     room: null,   
+    room: null,
     activePlayers: [],
     currentTurn: 0,
     diceValue: 0,
     pieces: {},
     gameWon: null,
     movablePieces: [],
-    timestamp: new Date,
+    timestamp: new Date(),
   };
+
+  turnOrder: TurnOrder[] = [
+    TurnOrder.RED,
+    TurnOrder.BLUE,
+    TurnOrder.GREEN,
+    TurnOrder.YELLOW,
+  ];
 
   private myColor: string = 'RED';
   private isAnimating = false;
@@ -40,7 +58,6 @@ export class GameService {
             currentX: 40,
             currentY: 400,
           },
-          // {id: 'RED_0', color:'red', position: -1, currentX: 40, currentY: 240},
           {
             id: 'RED_1',
             color: 'red',
@@ -171,9 +188,7 @@ export class GameService {
       this.gameState.activePlayers = playerColors;
       this.myColor = myColor || playerColors[0];
     } else {
-      const turnOrder = ['RED', 'BLUE', 'GREEN', 'YELLOW'];
-
-      this.gameState.activePlayers = turnOrder.slice(0, playerCount);
+      this.gameState.activePlayers = this.turnOrder.slice(0, playerCount);
       this.myColor = this.gameState.activePlayers[0];
     }
 
@@ -329,17 +344,6 @@ export class GameService {
     if (!movingCell) {
       return false;
     }
-
-    // const safeCells = [
-    //   { row: 14, col:7 },
-    //   { row: 2, col: 9 },
-    //   { row: 7, col: 2 },
-    //   { row: 9, col: 14 },
-    //   { row: 9, col: 6 },
-    //   { row: 7, col:10 },
-    //   { row: 6, col: 7 },
-    //   { row: 10, col: 9 }
-    // ];
 
     const safeCells = [
       { row: 14, col: 7 },
@@ -511,13 +515,13 @@ export class GameService {
   getPathMap(color: string): { row: number; col: number }[] {
     switch (color) {
       case 'red':
-        return this.PathArrayRED;
+        return PathArrayRED;
       case 'green':
-        return this.PathArrayGREEN;
+        return PathArrayGREEN;
       case 'blue':
-        return this.PathArrayBLUE;
+        return PathArrayBLUE;
       case 'yellow':
-        return this.PathArrayYELLOW;
+        return PathArrayYELLOW;
       default:
         return [];
     }
@@ -609,245 +613,4 @@ export class GameService {
       piece.currentY = pos.y;
     }
   }
-
-  PathArrayRED = [
-    { row: 14, col: 7 },
-    { row: 13, col: 7 },
-    { row: 12, col: 7 },
-    { row: 11, col: 7 },
-    { row: 10, col: 7 },
-    { row: 9, col: 6 },
-    { row: 9, col: 5 },
-    { row: 9, col: 4 },
-    { row: 9, col: 3 },
-    { row: 9, col: 2 },
-    { row: 9, col: 1 },
-    { row: 8, col: 1 },
-    { row: 7, col: 1 },
-    { row: 7, col: 2 },
-    { row: 7, col: 3 },
-    { row: 7, col: 4 },
-    { row: 7, col: 5 },
-    { row: 7, col: 6 },
-    { row: 6, col: 7 },
-    { row: 5, col: 7 },
-    { row: 4, col: 7 },
-    { row: 3, col: 7 },
-    { row: 2, col: 7 },
-    { row: 1, col: 7 },
-    { row: 1, col: 8 },
-    { row: 1, col: 9 },
-    { row: 2, col: 9 },
-    { row: 3, col: 9 },
-    { row: 4, col: 9 },
-    { row: 5, col: 9 },
-    { row: 6, col: 9 },
-    { row: 7, col: 10 },
-    { row: 7, col: 11 },
-    { row: 7, col: 12 },
-    { row: 7, col: 13 },
-    { row: 7, col: 14 },
-    { row: 7, col: 15 },
-    { row: 8, col: 15 },
-    { row: 9, col: 15 },
-
-    { row: 9, col: 14 },
-    { row: 9, col: 13 },
-    { row: 9, col: 12 },
-    { row: 9, col: 11 },
-    { row: 9, col: 10 },
-    { row: 10, col: 9 },
-    { row: 11, col: 9 },
-    { row: 12, col: 9 },
-    { row: 13, col: 9 },
-    { row: 14, col: 9 },
-    { row: 15, col: 9 },
-    { row: 15, col: 8 },
-    { row: 14, col: 8 },
-    { row: 13, col: 8 },
-    { row: 12, col: 8 },
-    { row: 11, col: 8 },
-    { row: 10, col: 8 },
-    { row: 9, col: 8 },
-  ];
-
-  PathArrayGREEN = [
-    { row: 2, col: 9 },
-    { row: 3, col: 9 },
-    { row: 4, col: 9 },
-    { row: 5, col: 9 },
-    { row: 6, col: 9 },
-    { row: 7, col: 10 },
-    { row: 7, col: 11 },
-    { row: 7, col: 12 },
-    { row: 7, col: 13 },
-    { row: 7, col: 14 },
-    { row: 7, col: 15 },
-    { row: 8, col: 15 },
-    { row: 9, col: 15 },
-
-    { row: 9, col: 14 },
-    { row: 9, col: 13 },
-    { row: 9, col: 12 },
-    { row: 9, col: 11 },
-    { row: 9, col: 10 },
-    { row: 10, col: 9 },
-    { row: 11, col: 9 },
-    { row: 12, col: 9 },
-    { row: 13, col: 9 },
-    { row: 14, col: 9 },
-    { row: 15, col: 9 },
-    { row: 15, col: 8 },
-    { row: 14, col: 7 },
-    { row: 13, col: 7 },
-    { row: 12, col: 7 },
-    { row: 11, col: 7 },
-    { row: 10, col: 7 },
-    { row: 9, col: 6 },
-    { row: 9, col: 5 },
-    { row: 9, col: 4 },
-    { row: 9, col: 3 },
-    { row: 9, col: 2 },
-    { row: 9, col: 1 },
-    { row: 8, col: 1 },
-    { row: 8, col: 1 },
-    { row: 7, col: 1 },
-    { row: 7, col: 2 },
-    { row: 7, col: 3 },
-    { row: 7, col: 4 },
-    { row: 7, col: 5 },
-    { row: 7, col: 6 },
-    { row: 6, col: 7 },
-    { row: 5, col: 7 },
-    { row: 4, col: 7 },
-    { row: 3, col: 7 },
-    { row: 2, col: 7 },
-    { row: 1, col: 7 },
-    { row: 1, col: 8 },
-    { row: 2, col: 8 },
-    { row: 3, col: 8 },
-    { row: 4, col: 8 },
-    { row: 5, col: 8 },
-    { row: 6, col: 8 },
-    { row: 7, col: 8 },
-  ];
-
-  PathArrayBLUE = [
-    { row: 7, col: 2 },
-    { row: 7, col: 3 },
-    { row: 7, col: 4 },
-    { row: 7, col: 5 },
-    { row: 7, col: 6 },
-    { row: 6, col: 7 },
-    { row: 5, col: 7 },
-    { row: 4, col: 7 },
-    { row: 3, col: 7 },
-    { row: 2, col: 7 },
-    { row: 1, col: 7 },
-    { row: 1, col: 8 },
-    { row: 1, col: 9 },
-    { row: 2, col: 9 },
-    { row: 3, col: 9 },
-    { row: 4, col: 9 },
-    { row: 5, col: 9 },
-    { row: 6, col: 9 },
-    { row: 7, col: 10 },
-    { row: 7, col: 11 },
-    { row: 7, col: 12 },
-    { row: 7, col: 13 },
-    { row: 7, col: 14 },
-    { row: 7, col: 15 },
-    { row: 8, col: 15 },
-    { row: 9, col: 15 },
-
-    { row: 9, col: 14 },
-    { row: 9, col: 13 },
-    { row: 9, col: 12 },
-    { row: 9, col: 11 },
-    { row: 9, col: 10 },
-    { row: 10, col: 9 },
-    { row: 11, col: 9 },
-    { row: 12, col: 9 },
-    { row: 13, col: 9 },
-    { row: 14, col: 9 },
-    { row: 15, col: 9 },
-    { row: 15, col: 8 },
-    { row: 14, col: 7 },
-    { row: 13, col: 7 },
-    { row: 12, col: 7 },
-    { row: 11, col: 7 },
-    { row: 10, col: 7 },
-    { row: 9, col: 6 },
-    { row: 9, col: 5 },
-    { row: 9, col: 4 },
-    { row: 9, col: 3 },
-    { row: 9, col: 2 },
-    { row: 9, col: 1 },
-    { row: 8, col: 1 },
-    { row: 8, col: 2 },
-    { row: 8, col: 3 },
-    { row: 8, col: 4 },
-    { row: 8, col: 5 },
-    { row: 8, col: 6 },
-    { row: 8, col: 7 },
-  ];
-  PathArrayYELLOW = [
-    { row: 9, col: 14 },
-    { row: 9, col: 13 },
-    { row: 9, col: 12 },
-    { row: 9, col: 11 },
-    { row: 9, col: 10 },
-    { row: 10, col: 9 },
-    { row: 11, col: 9 },
-    { row: 12, col: 9 },
-    { row: 13, col: 9 },
-    { row: 14, col: 9 },
-    { row: 15, col: 9 },
-    { row: 15, col: 8 },
-    { row: 15, col: 7 },
-    { row: 14, col: 7 },
-    { row: 13, col: 7 },
-    { row: 12, col: 7 },
-    { row: 11, col: 7 },
-    { row: 10, col: 7 },
-    { row: 9, col: 6 },
-    { row: 9, col: 5 },
-    { row: 9, col: 4 },
-    { row: 9, col: 3 },
-    { row: 9, col: 2 },
-    { row: 9, col: 1 },
-    { row: 8, col: 1 },
-    { row: 7, col: 1 },
-    { row: 7, col: 2 },
-    { row: 7, col: 3 },
-    { row: 7, col: 4 },
-    { row: 7, col: 5 },
-    { row: 7, col: 6 },
-    { row: 6, col: 7 },
-    { row: 5, col: 7 },
-    { row: 4, col: 7 },
-    { row: 3, col: 7 },
-    { row: 2, col: 7 },
-    { row: 1, col: 7 },
-    { row: 1, col: 8 },
-    { row: 1, col: 9 },
-    { row: 2, col: 9 },
-    { row: 3, col: 9 },
-    { row: 4, col: 9 },
-    { row: 5, col: 9 },
-    { row: 6, col: 9 },
-    { row: 7, col: 10 },
-    { row: 7, col: 11 },
-    { row: 7, col: 12 },
-    { row: 7, col: 13 },
-    { row: 7, col: 14 },
-    { row: 7, col: 15 },
-    { row: 8, col: 15 },
-    { row: 8, col: 14 },
-    { row: 8, col: 13 },
-    { row: 8, col: 12 },
-    { row: 8, col: 11 },
-    { row: 8, col: 10 },
-    { row: 8, col: 9 },
-  ];
 }

@@ -14,18 +14,30 @@ export class UsersService {
     hashedPassword: string,
     email: string,
   ): Promise<User> {
-    return await this.userModel.create({
-      username,
-      email,
-      password: hashedPassword,
-    });
+    try {
+      return await this.userModel.create({
+        username,
+        email,
+        password: hashedPassword,
+      });
+    } catch (error) {
+      throw error;
+    }
   }
 
-  async findOne(username: string): Promise<User | null> {
-    return await this.userModel.findOne({ where: { username } });
+  async findUserByUserName(username: string): Promise<User | null> {
+    try {
+      return await this.userModel.findOne({ where: { username } });
+    } catch (error) {
+      throw error;
+    }
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    return await this.userModel.findOne({ where: { email } });
+  async findUserByEmail(email: string): Promise<User | null> {
+    try {
+      return await this.userModel.findOne({ where: { email } });
+    } catch (error) {
+      throw error;
+    }
   }
 }

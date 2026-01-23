@@ -1,7 +1,9 @@
 import { IsString, IsNotEmpty, MinLength } from 'class-validator';
-import { UserdDto } from './user.dto';
 
-export class LoginDto {
+export class UserdDto {
+  @IsString()
+  id: number;
+
   @IsString()
   @IsNotEmpty()
   username: string;
@@ -10,12 +12,4 @@ export class LoginDto {
   @IsNotEmpty()
   @MinLength(6)
   password: string;
-}
-
-export class AuthResponseDto {
-  @IsString()
-  @IsNotEmpty()
-  accessToken: string;
-
-  user: UserdDto;
 }

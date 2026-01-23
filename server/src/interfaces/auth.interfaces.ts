@@ -1,27 +1,18 @@
 export interface ISignInResponse {
   accessToken: string;
-  user: {
-    id: number;
-    username: string;
-    email: string;
-  };
+  user: IUser;
 }
 
 export interface IAuthResponse {
   accessToken?: string;
-  message: string;
-  user: {
-    id: number;
-    username: string;
-    email: string;
-  };
+  user: IUser;
+}
+export interface IRegisterResponse {
+  user: IUser;
 }
 
-export interface IRegisterResponse {
-  message: string;
-  user: {
-    id: number;
-    username: string;
-    email: string;
-  };
+export interface IUser {
+  id: number;
+  username: string;
+  email: string;
 }

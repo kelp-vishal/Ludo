@@ -18,7 +18,6 @@ export class AuthService {
   RegisterResponse: IRegisterResponse[] = [];
 
   private apiUrl = 'http://localhost:3002/auth';
-  // private apiUrl = 'https://f1vbcpxc-3002.inc1.devtunnels.ms/auth';
   private currentUserSubject = new BehaviorSubject<IUser | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
   private isBrowser: boolean;

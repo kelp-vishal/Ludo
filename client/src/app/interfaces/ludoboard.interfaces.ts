@@ -6,7 +6,6 @@ export interface IPiece {
   currentY: number;
 }
 
-
 export interface IGameState {
   activePlayers: string[];
   currentTurn: number;
@@ -15,7 +14,7 @@ export interface IGameState {
   gameWon: string | null;
   movablePieces: string[];
   timestamp: Date;
-  room:string | null;
+  room: string | null;
 }
 
 export interface IAvailableRoom {

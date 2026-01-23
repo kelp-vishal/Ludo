@@ -1,12 +1,12 @@
 import { SetMetadata } from '@nestjs/common';
 
 export enum Permission {
-  GAME_CREATE = 'game:create',
-  GAME_VIEW = 'game:view',
-  GAME_UPDATE = 'game:update',
-  GAME_DELETE = 'game:delete',
-  ROOM_CREATE = 'room:create',
-  ROOM_MANAGE = 'room:manage',
+  gameCreate = 'game:create',
+  gameView = 'game:view',
+  gameUpdate = 'game:update',
+  gameDelete = 'game:delete',
+  roomCreate = 'room:create',
+  roomManage = 'room:manage',
 }
 
 export const PERMISSIONS_KEY = 'permissions';

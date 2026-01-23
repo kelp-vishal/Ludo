@@ -1,11 +1,13 @@
-import { Column, Model, Table, DataType } from 'sequelize-typescript';
+import { Column, Table, DataType } from 'sequelize-typescript';
 
 @Table({
   tableName: 'users',
+  schema: 'public',
   timestamps: false,
 })
-export class User extends Model {
+export class User {
   @Column({
+    field: 'id',
     type: DataType.INTEGER,
     autoIncrement: true,
     primaryKey: true,
@@ -13,6 +15,7 @@ export class User extends Model {
   id: number;
 
   @Column({
+    field: 'username',
     type: DataType.STRING,
     unique: true,
     allowNull: false,
@@ -20,6 +23,7 @@ export class User extends Model {
   username: string;
 
   @Column({
+    field: 'email',
     type: DataType.STRING,
     unique: true,
     allowNull: false,
@@ -27,6 +31,7 @@ export class User extends Model {
   email: string;
 
   @Column({
+    field: 'password',
     type: DataType.STRING,
     allowNull: false,
   })

@@ -33,7 +33,6 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('login')
   @ApiOperation({ summary: 'User Login' })
-  @ApiResponse({ status: 200, description: 'Login Succcessful' })
   @ApiResponse({ status: 401, description: 'Invalid Credential' })
   signIn(@Body() loginDto: LoginDto): Promise<ISignInResponse> {
     return this.authService.signIn(loginDto.username, loginDto.password);
@@ -43,7 +42,6 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @Post('register')
   @ApiOperation({ summary: 'User Registration' })
-  @ApiResponse({ status: 200, description: 'Register Succcessful' })
   @ApiResponse({ status: 401, description: 'User already Exists' })
   async register(@Body() registerDto: RegisterDto): Promise<IRegisterResponse> {
     return this.authService.register(
@@ -56,8 +54,8 @@ export class AuthController {
   @Get('profile')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get User Profile' })
-  @ApiResponse({ status: 200, description: 'Profile Retrieved successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   getProfile(@Req() req): void {
     return req.user;
   }

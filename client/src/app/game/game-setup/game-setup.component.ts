@@ -6,11 +6,8 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
-import {
-  IAvailableRoom,
-  IGameState,
-} from '../../interfaces/ludoboard.interfaces';
-
+import { IAvailableRoom } from '../../interfaces/ludoboard.interfaces';
+import { TurnOrder } from '../../common/enum/turn-order.enum';
 @Component({
   selector: 'app-game-setup',
   standalone: true,
@@ -36,6 +33,13 @@ export class GameSetupComponent implements OnInit {
     public router: Router,
   ) {}
 
+  turnOrder: TurnOrder[] = [
+    TurnOrder.RED,
+    TurnOrder.BLUE,
+    TurnOrder.GREEN,
+    TurnOrder.YELLOW,
+  ];
+
   ngOnInit(): void {
     this.currentRoom$ = this.roomService.currentRoom$;
     // Checking socket connectin
@@ -49,18 +53,22 @@ export class GameSetupComponent implements OnInit {
     });
 
     this.socketService.gameStarted$.subscribe((data) => {
-      if (!data) return;
+      if (!data) {
+        return;
+      }
 
       const currentRoom = this.roomService.getCurrentRoom();
 
-      if (!currentRoom) return;
-
-      const TURN_ORDER = ['RED', 'BLUE', 'GREEN', 'YELLOW'];
+      if (!currentRoom) {
+        return;
+      }
 
       const joinedColors = currentRoom.players
         .map((p) => p.color)
         .filter((color): color is string => color !== undefined);
-      const playerColors = TURN_ORDER.filter((c) => joinedColors.includes(c));
+      const playerColors = this.turnOrder.filter((c) =>
+        joinedColors.includes(c),
+      );
       const myColor =
         currentRoom.players.find((p) => p.socketId === this.socketId)?.color ||
         'RED';

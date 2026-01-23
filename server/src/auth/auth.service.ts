@@ -8,6 +8,7 @@ import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ISignInResponse, IAuthResponse } from '../interfaces/auth.interfaces';
+import { error } from 'console';
 
 @Injectable()
 export class AuthService {
@@ -18,29 +19,37 @@ export class AuthService {
   ) {}
 
   async signIn(username: string, password: string): Promise<ISignInResponse> {
-    const user = await this.userService.findOne(username);
+    try {
+      const user = await this.userService.findUserByUserName(username);
 
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      if (!user) {
+        this.logger.error('Invalid credentials Entered');
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      const match = await bcrypt.compare(password, user.password);
+
+      if (!match) {
+        this.logger.error('Invalid credentials Entered');
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      this.logger.log('SignIn Successfully');
+      return {
+        accessToken: this.jwtService.sign({
+          sub: user.id,
+          username: user.username,
+        }),
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+        },
+      };
+    } catch (error) {
+      this.logger.error('Something Went Wrong While SignIn..');
+      throw error;
     }
-
-    const match = await bcrypt.compare(password, user.password);
-
-    if (!match) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    return {
-      accessToken: this.jwtService.sign({
-        sub: user.id,
-        username: user.username,
-      }),
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-      },
-    };
   }
 
   async register(
@@ -48,32 +57,39 @@ export class AuthService {
     password: string,
     email: string,
   ): Promise<IAuthResponse> {
-    // Check if user already exists
-    const existingUser = await this.userService.findOne(username);
-    if (existingUser) {
-      throw new ConflictException('Username already exists');
+    try {
+      // Check if user already exists
+      const existingUser = await this.userService.findUserByUserName(username);
+      if (existingUser) {
+        this.logger.error('Username already exists');
+        throw new ConflictException('Username already exists');
+      }
+
+      const existingEmail = await this.userService.findUserByEmail(email);
+      if (existingEmail) {
+        throw new ConflictException('Email already exists');
+      }
+
+      // Hash password and create user
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newUser = await this.userService.createUser(
+        username,
+        hashedPassword,
+        email,
+      );
+
+      this.logger.log('Registration Successfully Done..');
+
+      return {
+        user: {
+          id: newUser.id,
+          username: newUser.username,
+          email: newUser.email,
+        },
+      };
+    } catch {
+      this.logger.error('Something Went Wrong while Registration..');
+      throw error;
     }
-
-    const existingEmail = await this.userService.findByEmail(email);
-    if (existingEmail) {
-      throw new ConflictException('Email already exists');
-    }
-
-    // Hash password and create user
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await this.userService.createUser(
-      username,
-      hashedPassword,
-      email,
-    );
-
-    return {
-      message: 'User registered successfully',
-      user: {
-        id: newUser.id,
-        username: newUser.username,
-        email: newUser.email,
-      },
-    };
   }
 }

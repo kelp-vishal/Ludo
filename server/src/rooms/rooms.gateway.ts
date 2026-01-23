@@ -9,7 +9,8 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { IGameRoom } from 'src/interfaces/roomsGateway.interfaces';
+import { IData, IGameRoom } from 'src/interfaces/roomsGateway.interfaces';
+import { Colors } from '../common/enum/roomsGateway.enum';
 
 @WebSocketGateway({
   path: '/socket.io',
@@ -17,7 +18,7 @@ import { IGameRoom } from 'src/interfaces/roomsGateway.interfaces';
     origin: '*',
     method: ['GET', 'POST'],
   },
-  transports: ['polling', 'websocket'],
+  transports: ['websocket'],
 })
 export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
@@ -28,7 +29,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private rooms: Map<string, IGameRoom> = new Map();
   private playerRooms: Map<string, string> = new Map();
   private roomColorIndex: Map<string, number> = new Map();
-  private colors = ['RED', 'GREEN', 'BLUE', 'YELLOW'];
+  colors: Colors[] = [Colors.RED, Colors.BLUE, Colors.GREEN, Colors.YELLOW];
 
   handleConnection(client: Socket): void {
     this.logger.log(`New user Connected :,${client.id}`);
@@ -75,7 +76,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleCreateRoom(
     @ConnectedSocket() client: Socket,
     @MessageBody()
-    data: { playerCount: number; playerName: string; socketId: string },
+    data: IData,
   ): void {
     const roomId = this.generateRoomId();
     const room: IGameRoom = {
@@ -117,10 +118,9 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleJoinRoom(
     @ConnectedSocket() client: Socket,
     @MessageBody()
-    data: { roomId: string; playerName: string; socketId: string },
+    data: IData,
   ): void {
     const room = this.rooms.get(data.roomId);
-
     if (!room) {
       client.emit('room-error', {
         message: `Room ${data.roomId} not found`,

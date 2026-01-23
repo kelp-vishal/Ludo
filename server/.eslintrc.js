@@ -19,7 +19,7 @@ module.exports = {
   rules: {
     '@typescript-eslint/naming-convention': "off",
     '@typescript-eslint/explicit-function-return-type': 'error',
-    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/explicit-module-boundary-types': 'error',
     '@typescript-eslint/no-explicit-any': 'error',
   },
 };

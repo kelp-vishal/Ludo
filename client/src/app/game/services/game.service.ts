@@ -207,112 +207,6 @@ export class GameService {
     this.gameState.movablePieces = [];
   }
 
-  rollDice(): number {
-    const currentPlayer =
-      this.gameState.activePlayers[this.gameState.currentTurn];
-    if (currentPlayer !== this.myColor) {
-      return this.gameState.diceValue;
-    }
-
-    const diceRoll = Math.floor(Math.random() * 6) + 1;
-    this.gameState.diceValue = diceRoll;
-    this.gameState.movablePieces = this.calculateMovablePieces(
-      currentPlayer,
-      this.gameState.diceValue,
-    );
-
-    this.gameStateSubject.next({ ...this.gameState });
-    return this.gameState.diceValue;
-  }
-
-  private calculateMovablePieces(color: string, dice: number): string[] {
-    const movable: string[] = [];
-    ['_0', '_1', '_2', '_3'].forEach((suffix) => {
-      const pieceId = `${color}${suffix}`;
-      const pos = this.gameState.pieces[pieceId];
-      if (pos === -999) {
-        return;
-      } // Hidden
-
-      if (pos === -1 && dice === 6) {
-        movable.push(pieceId);
-      } else if (pos >= 0 && pos + dice <= 56) {
-        movable.push(pieceId);
-      }
-    });
-    return movable;
-  }
-
-  async movePiece(pieceId: string): Promise<boolean> {
-    const color = pieceId.split('_')[0];
-    const currentPlayer =
-      this.gameState.activePlayers[this.gameState.currentTurn];
-
-    if (
-      currentPlayer !== color ||
-      !this.gameState.movablePieces.includes(pieceId)
-    ) {
-      return false; // Invalid
-    }
-
-    this.isAnimating = true;
-
-    const oldPos = this.gameState.pieces[pieceId];
-    const gotSix = this.gameState.diceValue === 6;
-
-    if (oldPos === -1) {
-      this.gameState.pieces[pieceId] = 0;
-      this.syncUiPieces();
-      this.gameStateSubject.next({ ...this.gameState });
-      await this.delay(400);
-
-      // Keep turn because rolled 6 to come out
-      // Don't change turn, player gets another roll
-
-      // Reset for next roll
-      this.gameState.movablePieces = [];
-      this.gameState.diceValue = 0;
-
-      this.gameStateSubject.next({ ...this.gameState });
-      this.isAnimating = false;
-
-      return true;
-    }
-
-    const startPos = oldPos;
-    const steps = this.gameState.diceValue;
-
-    for (let step = 1; step <= steps; step++) {
-      const currentPos = startPos + step;
-      this.gameState.pieces[pieceId] = currentPos;
-      this.syncUiPieces();
-      this.gameStateSubject.next({ ...this.gameState });
-
-      await this.delay(400);
-    }
-
-    const killedSomeone = await this.checkCollisionsByCoordinates(
-      pieceId,
-      color,
-    );
-
-    if (!gotSix && !killedSomeone) {
-      this.gameState.currentTurn =
-        (this.gameState.currentTurn + 1) % this.gameState.activePlayers.length;
-    }
-
-    // Reset
-    this.gameState.movablePieces = [];
-    this.gameState.diceValue = 0;
-
-    this.checkWin();
-    this.gameStateSubject.next({ ...this.gameState });
-
-    this.isAnimating = false;
-
-    return true;
-  }
-
   private delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
@@ -320,88 +214,6 @@ export class GameService {
   updateGameState(newState: IGameState): void {
     this.gameState = { ...newState };
     this.gameStateSubject.next({ ...this.gameState });
-  }
-
-  private async checkCollisionsByCoordinates(
-    movingPieceId: string,
-    movingColor: string,
-  ): Promise<boolean> {
-    const movingPiece = this.pieces.find((p) => p.id === movingPieceId);
-    if (!movingPiece) {
-      return false;
-    }
-
-    const movingPos = this.gameState.pieces[movingPieceId];
-
-    if (movingPos === -1 || movingPos >= 52) {
-      return false;
-    }
-
-    //actual coordinates
-    const movingPath = this.getPathMap(movingColor.toLowerCase());
-    const movingCell = movingPath[movingPos];
-
-    if (!movingCell) {
-      return false;
-    }
-
-    const safeCells = [
-      { row: 14, col: 7 },
-      { row: 9, col: 3 },
-      { row: 7, col: 2 },
-      { row: 3, col: 7 },
-      { row: 2, col: 9 },
-      { row: 7, col: 13 },
-      { row: 9, col: 14 },
-      { row: 13, col: 9 },
-    ];
-
-    const isSafe = safeCells.some(
-      (safe) => safe.row === movingCell.row && safe.col === movingCell.col,
-    );
-    if (isSafe) {
-      return false;
-    }
-
-    let killedSomeone = false;
-
-    for (const pieceId of Object.keys(this.gameState.pieces)) {
-      if (pieceId === movingPieceId) {
-        continue;
-      }
-
-      const opponentPos = this.gameState.pieces[pieceId];
-      if (opponentPos === -1 || opponentPos >= 52) {
-        continue;
-      }
-      const opponentColor = pieceId.split('_')[0];
-      if (!this.gameState.activePlayers.includes(opponentColor)) {
-        continue;
-      }
-
-      // Get opponent's actual grid coordinates
-      const opponentPath = this.getPathMap(opponentColor.toLowerCase());
-      const opponentCell = opponentPath[opponentPos];
-
-      if (!opponentCell) {
-        continue;
-      }
-
-      // Comparing actual grid
-      if (
-        opponentCell.row === movingCell.row &&
-        opponentCell.col === movingCell.col
-      ) {
-        if (opponentColor !== movingColor) {
-          await this.sendPieceHome(pieceId);
-          killedSomeone = true;
-        } else {
-          //same Color
-        }
-      }
-    }
-
-    return killedSomeone;
   }
 
   private async sendPieceHome(pieceId: string): Promise<void> {
@@ -501,16 +313,6 @@ export class GameService {
     return this.myColor;
   }
 
-  private checkWin(): void {
-    this.gameState.activePlayers.forEach((color) => {
-      const allWon = ['_0', '_1', '_2', '_3'].every(
-        (suffix) => this.gameState.pieces[`${color}${suffix}`] >= 58,
-      );
-      if (allWon) {
-        this.gameState.gameWon = color;
-      }
-    });
-  }
 
   getPathMap(color: string): { row: number; col: number }[] {
     switch (color) {
@@ -551,7 +353,7 @@ export class GameService {
     return this.gameState.activePlayers[this.gameState.currentTurn] || '';
   }
 
-  private syncUiPieces(): void {
+  public syncUiPieces(): void {
     this.pieces = this.piecesSubject.value;
     const updated = this.pieces.map((p) => {
       const newPiece = { ...p };

@@ -72,11 +72,18 @@ export class GameSetupComponent implements OnInit {
       const myColor =
         currentRoom.players.find((p) => p.socketId === this.socketId)?.color ||
         'RED';
+
+      // Initialize game with servers game state
       this.gameService.startGame(
         currentRoom.currentPlayers,
         playerColors,
         myColor,
       );
+
+      //update with server's game state
+      if(data.gameState){
+        this.gameService.updateGameState(data.gameState);
+      }
 
       this.router.navigate(['/ludo-board']);
     });

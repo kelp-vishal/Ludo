@@ -3,7 +3,14 @@ import { io, Socket } from 'socket.io-client';
 import { BehaviorSubject } from 'rxjs';
 import { IRoom } from '../../interfaces/socket.interfaces';
 import { environment } from '../../../environments/environment';
-import { IGameState } from '../../interfaces/ludoboard.interfaces';
+import {
+  IGameState,
+  IDiceRolledEvent,
+  IPieceMovedEvent,
+  ITurnChangedEvent,
+  IGameWonEvent,
+  IGameStartedEvent
+} from '../../interfaces/ludoboard.interfaces';
 import { IRemoteGameState } from '../../interfaces/room.interfaces';
 
 @Injectable({ providedIn: 'root' })
@@ -19,11 +26,29 @@ export class SocketService {
     Array<{ socketId: string; color?: string }>
   >([]);
   private gameStateSubject = new BehaviorSubject<IGameState | null>(null);
-  private gameStartedSubject = new BehaviorSubject<IGameState  | null>(null);
+  private gameStartedSubject = new BehaviorSubject<IGameStartedEvent | null>(null);
   private remoteGameStateSubject = new BehaviorSubject<IRemoteGameState | null>(
     null,
   );
+
+  private diceRolledSubject = new BehaviorSubject<IDiceRolledEvent | null>(
+    null,
+  );
+  private pieceMovedSubject = new BehaviorSubject<IPieceMovedEvent | null>(
+    null,
+  );
+  private turnChangedSubject = new BehaviorSubject<ITurnChangedEvent | null>(
+    null,
+  );
+  private gameWonSubject = new BehaviorSubject<IGameWonEvent | null>(null);
+  private gameErrorSubject = new BehaviorSubject<string | null>(null);
+
   remoteGameState$ = this.remoteGameStateSubject.asObservable();
+  diceRolled$ = this.diceRolledSubject.asObservable();
+  pieceMoved$ = this.pieceMovedSubject.asObservable();
+  turnChanged$ = this.turnChangedSubject.asObservable();
+  gameWon$ = this.gameWonSubject.asObservable();
+  gameError$ = this.gameErrorSubject.asObservable();
 
   connected$ = this.connectedSubject.asObservable();
   socketId$ = this.socketIdSubject.asObservable();
@@ -91,12 +116,40 @@ export class SocketService {
       this.roomsSubject.next(data.rooms);
     });
 
-    this.socket.on('game-started', (data: IGameState) => {
+    this.socket.on('game-started', (data: IGameStartedEvent) => {
       this.gameStartedSubject.next(data);
     });
 
     this.socket.on('game-state-update', (data: IRemoteGameState) => {
       this.remoteGameStateSubject.next(data);
+    });
+
+    this.socket.on('dice-rolled', (data: IDiceRolledEvent) => {
+      this.diceRolledSubject.next(data);
+    });
+
+    this.socket.on('piece-moved', (data: IPieceMovedEvent) => {
+      this.pieceMovedSubject.next(data);
+    });
+
+    this.socket.on('turn-changed', (data: ITurnChangedEvent) => {
+      this.turnChangedSubject.next(data);
+    });
+
+    this.socket.on('turn-passed', (data: ITurnChangedEvent) => {
+      this.turnChangedSubject.next(data);
+    });
+
+    this.socket.on('turn-reset', (data: {gameState:IGameState}) => {
+      this.gameStateSubject.next(data.gameState);
+    });
+
+    this.socket.on('game-won', (data: IGameWonEvent) => {
+      this.gameWonSubject.next(data);
+    });
+
+    this.socket.on('game-error', (data: { message: string }) => {
+      this.gameErrorSubject.next(data.message);
     });
 
     this.socket.on('room-error', (data: { message: string }) => {});
@@ -151,6 +204,33 @@ export class SocketService {
       this.socket.emit('game-state-update', {
         socketId: this.socket.id,
         gameState,
+      });
+    }
+  }
+
+  rollDice(roomId: string): void {
+    if (this.socket) {
+      this.socket.emit('roll-dice', {
+        roomId,
+        socketId: this.socket.id,
+      });
+    }
+  }
+
+  movePiece(roomId: string, pieceId: string): void {
+    if (this.socket) {
+      this.socket.emit('move-piece', {
+        roomId,
+        pieceId,
+        socketId: this.socket.id,
+      });
+    }
+  }
+
+  getGameState(roomId: string): void {
+    if (this.socket) {
+      this.socket.emit('get-game-state', {
+        roomId,
       });
     }
   }

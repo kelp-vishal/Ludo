@@ -1,6 +1,9 @@
 import { Component, OnInit, signal, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IPiece } from '../../interfaces/ludoboard.interfaces';
+import {
+  IPiece,
+  IPieceMovedEvent,
+} from '../../interfaces/ludoboard.interfaces';
 import { IGameState } from '../../interfaces/ludoboard.interfaces';
 import { GameService } from '../services/game.service';
 import { SocketService } from '../services/socket.service';
@@ -17,6 +20,7 @@ import { IGameStateUpdate } from '../../interfaces/ludoboard.interfaces';
 })
 export class LudoBoardComponent implements OnInit, OnDestroy {
   Math = Math;
+  turnOrder = ['RED', 'BLUE', 'GREEN', 'YELLOW'];
   valueDice = signal(1);
 
   pieces: IPiece[] = [];
@@ -43,52 +47,65 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
       },
     );
 
-    // Subscribe to socket game state updates from other players
-    const socketStateSubscription =
-      this.socketService.remoteGameState$.subscribe((remoteState) => {
-        if (
-          remoteState &&
-          remoteState.updatedBy !== this.socketService.getSocketId()
-        ) {
-          this.gameService.applyRemoteGameState(remoteState.gameState);
-        }
-      });
+    // Subscribe to dice rolled event from server
+    const diceRolledSubscription = this.socketService.diceRolled$.subscribe(
+      (data) => {
+        if (data) {
+          this.valueDice.set(data.diceValue);
+          // Update full game state from server
+          if (data.gameState) {
+            this.gameService.updateGameState(data.gameState);
 
-    this.subscriptions.push(gameStateSubscription, socketStateSubscription);
+            // Auto-move if only one piece is movable
+            if (data.gameState.movablePieces?.length === 1 && this.isMyTurn()) {
+              const pieceId = data.gameState.movablePieces[0];
+              setTimeout(() => {
+                this.selectPiece(pieceId);
+              }, 500);
+            }
+          }
+        }
+      },
+    );
+
+    // Subscribe to piece moved event from server
+    const pieceMovedSubscription = this.socketService.pieceMoved$.subscribe(
+      (data) => {
+        if (data) {
+          this.animatePieceMovement(data);
+        }
+      },
+    );
+
+    // Subscribe to turn changed event from server
+    const turnChangedSubscription = this.socketService.turnChanged$.subscribe(
+      (data) => {
+        if (data && data.gameState) {
+          this.gameService.updateGameState(data.gameState);
+        }
+      },
+    );
+
+    // Subscribe to game won event from server
+    const gameWonSubscription = this.socketService.gameWon$.subscribe(
+      (data) => {
+        if (data) {
+          // this.gameService.updateGameState({ gameWon: data.winner });
+        }
+      },
+    );
+
+    this.subscriptions.push(
+      gameStateSubscription,
+      diceRolledSubscription,
+      pieceMovedSubscription,
+      turnChangedSubscription,
+      gameWonSubscription,
+    );
   }
 
   ngOnDestroy(): void {
     this.subscriptions.forEach((sub) => sub.unsubscribe());
-  }
-
-  syncGameStateWithOthers(
-    lastMovedPieceId?: string,
-    fromPos?: number,
-    toPos?: number,
-  ): void {
-    if (this.gameState) {
-      const updateData: IGameStateUpdate = {
-        currentTurn: this.gameState.currentTurn,
-        diceValue: this.gameState.diceValue,
-        pieces: this.gameState.pieces,
-        movablePieces: this.gameState.movablePieces,
-        timestamp: new Date(),
-      };
-
-      if (
-        lastMovedPieceId !== undefined &&
-        fromPos !== undefined &&
-        toPos !== undefined
-      ) {
-        updateData.lastMove = {
-          pieceId: lastMovedPieceId,
-          fromPos: fromPos,
-          toPos: toPos,
-        };
-      }
-
-      this.socketService.sendGameStateUpdate(this.gameState);
-    }
   }
 
   getCurrentPlayerName(): string {
@@ -105,37 +122,18 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
 
   rollDice(): void {
     if (!this.gameState?.gameWon && this.isMyTurn()) {
-      this.isRolling = true;
-      this.syncGameStateWithOthers();
+      const currentRoom = this.roomService.getCurrentRoom();
+      if (!currentRoom) {
+        return;
+      }
 
-      const diceValue = this.gameService.rollDice();
-      this.valueDice.set(diceValue);
+      this.isRolling = true;
+
+      // Request dice roll from server
+      this.socketService.rollDice(currentRoom.roomId);
 
       setTimeout(() => {
         this.isRolling = false;
-
-        // Check if  no movable pieces
-        if (this.gameState?.movablePieces?.length === 0) {
-          if (this.gameState) {
-            this.gameState.diceValue = 0;
-            this.gameState.currentTurn =
-              (this.gameState.currentTurn + 1) %
-              this.gameState.activePlayers.length;
-            this.gameService.updateGameState(this.gameState);
-            this.syncGameStateWithOthers();
-          }
-        } else {
-          // Normal case
-
-          // Auto-move if -one piece only
-          if (this.gameState?.movablePieces?.length === 1) {
-            const pieceId = this.gameState.movablePieces[0];
-
-            setTimeout(() => {
-              this.selectPiece(pieceId);
-            }, 300);
-          }
-        }
       }, 800);
     }
   }
@@ -148,25 +146,61 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const oldPos = this.gameState?.pieces[pieceId] ?? -1;
-
-    // Calculate new position before animating
-    const diceValue = this.gameState?.diceValue ?? 0;
-    let newPos = oldPos;
-    if (oldPos === -1 && diceValue === 6) {
-      newPos = 0;
-    } else if (oldPos >= 0) {
-      newPos = oldPos + diceValue;
+    if (!this.gameState?.movablePieces.includes(pieceId)) {
+      return;
     }
 
-    // Sync with othr players
-    this.syncGameStateWithOthers(pieceId, oldPos, newPos);
-
-    const moved = await this.gameService.movePiece(pieceId);
-    if (moved === true) {
-      //Sync
-      this.syncGameStateWithOthers();
+    const currentRoom = this.roomService.getCurrentRoom();
+    if (!currentRoom) {
+      return;
     }
+
+    // Send move request to server
+    this.socketService.movePiece(currentRoom.roomId, pieceId);
+  }
+
+  private async animatePieceMovement(data: IPieceMovedEvent): Promise<void> {
+    if (!this.gameState) {
+      return;
+    }
+
+    const { pieceId, oldPosition, newPosition, steps, killedPieceId } = data;
+
+    // Animate piece movement step by step
+    if (steps && steps.length > 0) {
+      for (const step of steps) {
+        this.gameState.pieces[pieceId] = step;
+        this.gameService.syncUiPieces();
+        await this.delay(400);
+      }
+    } else {
+      this.gameState.pieces[pieceId] = newPosition;
+      this.gameService.syncUiPieces();
+    }
+
+    // Handle killed piece animation
+    if (killedPieceId) {
+      const killedPos = this.gameState.pieces[killedPieceId];
+      if (killedPos >= 0) {
+        // Animate piece going home
+        for (let pos = killedPos - 1; pos >= 0; pos--) {
+          this.gameState.pieces[killedPieceId] = pos;
+          this.gameService.syncUiPieces();
+          await this.delay(50);
+        }
+      }
+      this.gameState.pieces[killedPieceId] = -1;
+      this.gameService.syncUiPieces();
+    }
+
+    // Update game state from server
+    if (data.gameState) {
+      this.gameService.updateGameState(data.gameState);
+    }
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   getPieceScale(piece: IPiece): number {
@@ -336,6 +370,10 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
     return safeIndices.includes(index);
   }
 
+  // isStartZone(index: number): boolean {
+  //   const startIndices = [201, 23, 91, 133];
+  //   return startIndices.includes(index);
+  // }
   isFinishZone(index: number): boolean {
     const finishIndices = [96, 97, 98, 111, 113, 112, 128, 127, 126];
     return finishIndices.includes(index);

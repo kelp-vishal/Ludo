@@ -4,8 +4,9 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { RoomsModule } from './rooms/rooms.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { RoomsGateway } from './rooms/rooms.gateway';
 import { User } from './model/user.model';
+// import {GameModule} from './game/GameModule';
+import { GameModule } from './game/game.module';
 
 @Module({
   imports: [
@@ -27,8 +28,9 @@ import { User } from './model/user.model';
     RoomsModule,
     AuthModule,
     UsersModule,
+    GameModule,
   ],
   controllers: [],
-  providers: [RoomsGateway],
+  providers: [],
 })
 export class AppModule {}

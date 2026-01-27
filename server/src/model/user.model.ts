@@ -1,3 +1,5 @@
+// import { Model } from 'sequelize';
+import { Model } from 'sequelize-typescript';
 import { Column, Table, DataType } from 'sequelize-typescript';
 
 @Table({
@@ -5,7 +7,7 @@ import { Column, Table, DataType } from 'sequelize-typescript';
   schema: 'public',
   timestamps: false,
 })
-export class User {
+export class User extends Model {
   @Column({
     field: 'id',
     type: DataType.INTEGER,

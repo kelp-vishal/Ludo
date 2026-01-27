@@ -36,3 +36,38 @@ export interface IGameStateUpdate {
     toPos: number;
   };
 }
+
+export interface IDiceRolledEvent {
+  diceValue: number;
+  movablePieces: string[];
+  currentPlayer: string;
+  gameState: IGameState;
+  rolledBy: string;
+}
+
+export interface IPieceMovedEvent {
+  pieceId: string;
+  oldPosition: number;
+  newPosition: number;
+  steps: number[];
+  killedPieceId: string | null;
+  gameState: IGameState;
+  movedBy: string;
+}
+
+export interface ITurnChangedEvent {
+  gameState: IGameState;
+  message?: string;
+}
+
+export interface IGameWonEvent {
+  winner: string;
+  gameState: IGameState;
+}
+
+export interface IGameStartedEvent {
+  room: IAvailableRoom;
+  gameState: IGameState;
+  message: string;
+  players: Array<{ socketId: string; color?: string; playerName?: string }>;
+}

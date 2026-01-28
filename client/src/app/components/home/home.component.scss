@@ -1,0 +1,82 @@
+.home {
+  text-align: left;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-40);
+  position: relative;
+  z-index: 1;
+  width: 90%;
+  // max-width: 200rem;
+  margin: var(--spacing-80) var(--spacing-200) var(--spacing-100);
+
+  h1 {
+    font-family: var(--font-family-time);
+    font-size: var(--font-size-48);
+    color: var(--text-aqua);
+    margin: 0;
+  }
+
+  p {
+    font-family: var(--font-family-time);
+    font-size: var(--font-size-20);
+    color: var(--text-light);
+    margin: 0;
+  }
+}
+
+.ludo-image {
+  width: 50vw;
+  height: auto;
+  max-width: var(--spacing-500);
+}
+
+button {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--spacing-10) var(--spacing-15);
+  font-size: var(--font-size-28);
+  color: var(--text-dark);
+  border: none;
+  border-radius: var(--radius-14);
+  cursor: pointer;
+  box-shadow: 0 var(--spacing-4) var(--spacing-6) var(--text-dark);
+  margin: var(--spacing-20);
+
+  &:hover {
+    background-color: var(--bg-status-success);
+    box-shadow: 0 var(--spacing-6) var(--spacing-8) var(--text-aqua);
+  }
+}
+
+.welcome-message {
+  max-width: var(--spacing-500);
+  margin-right: var(--spacing-40);
+  color: var(--text-light);
+}
+
+.animated-btn {
+  padding: var(--spacing-15) var(--spacing-40);
+  color: rgb(0, 0, 0);
+  background: var(--bg-home-button);
+  background-size: 400% 400%;
+  border: none;
+  border-radius: var(--radius-8);
+  cursor: pointer;
+  animation: gradientShift 5s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}

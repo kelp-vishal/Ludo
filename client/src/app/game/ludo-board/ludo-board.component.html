@@ -138,39 +138,3 @@
     </div>
   </div>
 </div>
-
-<!-- <div
-  *ngFor="let piece of gameService.pieces"
-  [ngStyle]="{ left: piece.currentX + 'px', top: piece.currentY + 'px' }"
-  [class.movable]="gameState.movablePieces.includes(piece.id)">
-</div> -->
-
-<!-- <div class="game-container">
-  Game Info
-  <div class="dice-button">
-    <div>{{getCurrentPlayer()}}'s Turn ({{gameService.gameState.diceValue || '?'}})</div>
-    <button class="roll-btn" (click)="rollDice()" [disabled]="gameService.gameState.diceValue > 0 || isGameWon()">
-      Roll Dice
-    </button>
-    <div *ngIf="isGameWon()" class="win-message">
-      {{gameService.gameState.gameWon}} WINS! 
-    </div>
-  </div>  -->
-
-<!-- 15x15 Board -->
-<!-- <div class="ludo-board">
-    <div class="cell" *ngFor="let cell of gridCells; let i = index"
-         [style.grid-column]="(i % 15) + 1"
-         [style.grid-row]="Math.floor(i / 15) + 1">
-    </div>  -->
-<!-- Visible Pieces Only -->
-<!-- <div *ngFor="let piece of getVisiblePieces()"
-         class="piece"
-         [class.red]="piece.color === 'red'"
-         
-         [style.left.px]="piece.currentX"
-         [style.top.px]="piece.currentY"
-         (click)="selectPiece(piece.id)">
-    </div> -->
-<!-- </div> -->
-<!-- </div> -->

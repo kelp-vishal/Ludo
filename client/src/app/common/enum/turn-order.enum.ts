@@ -1,6 +1,6 @@
 export enum TurnOrder {
   RED = 'RED',
-  BLUE = 'BLUE',
   GREEN = 'GREEN',
+  BLUE = 'BLUE',
   YELLOW = 'YELLOW',
 }

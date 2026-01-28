@@ -9,7 +9,7 @@ import { Router, NavigationEnd } from '@angular/router';
   standalone: true,
   imports: [RouterOutlet, HeaderComponent, NgIf],
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css'],
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
   showHeader = false;

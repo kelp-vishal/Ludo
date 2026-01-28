@@ -1,0 +1,15 @@
+@use "../styles/colors.scss";
+@use "../styles/variables.scss" as *;
+@use "../styles/typography.scss" as *;
+
+header {
+  padding: auto;
+}
+body {
+  margin: 0;
+  font-family: var(--font-family-mono);
+  background-image: var(--bg-root);
+  color: var(--text-light);
+  font-size: large;
+  font-weight: 500;
+}

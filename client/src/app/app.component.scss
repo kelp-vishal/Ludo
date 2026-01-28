@@ -1,8 +1,6 @@
+// @use '../../styles/style.scss';
 .app-content {
   min-height: 100vh;
-}
-:root {
-  background-color: aqua;
 }
 
 form {
@@ -10,7 +8,7 @@ form {
   max-width: 40rem;
   margin: 3rem auto;
   padding: 2rem;
-  background: linear-gradient(180deg, #253c3c, #1d4949);
+  background: var(--bg-form);
   border-radius: 8px;
   box-shadow: 0 0 16px 1px rgba(0, 0, 0, 0.5);
 }
@@ -28,7 +26,7 @@ fieldset {
   display: block;
   font-size: 0.8rem;
   margin-bottom: 0.2rem;
-  color: #9bafaf;
+  color: var(--text-light);
   text-transform: uppercase;
   font-weight: bold;
 }
@@ -41,8 +39,8 @@ fieldset {
   font-size: 1rem;
   border-radius: 4px;
   border: 1px solid #758a8a;
-  background-color: #869999;
-  color: #142020;
+  background-color: var(--bg-form-button);
+  color: var(--text-dark);
 }
 
 .control select {
@@ -53,8 +51,8 @@ fieldset {
   font-size: 1rem;
   border-radius: 4px;
   border: 1px solid #758a8a;
-  background-color: #869999;
-  color: #142020;
+  background-color:var(--bg-form-button);
+  color: var(--text-dark);
 }
 
 .control:has(input[type="checkbox"]) {
@@ -74,14 +72,14 @@ fieldset {
   border-radius: 0;
   border: none;
   background-color: transparent;
-  color: #d9e2f1;
+  color: var( --text-light);
 }
 
 .control-error {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  color: #ffca99;
+  color: var( --text-light);
   height: 0.5rem;
   padding: 0.25rem 0 0 0;
   height: 1.5rem;
@@ -120,23 +118,23 @@ hr {
   font-size: 1rem;
   border-radius: 4px;
   border: none;
-  background-color: #147b73;
-  color: #d9e2f1;
+  background-color:var(--bg-form-button-light);
+  color: var(--text-light);
   cursor: pointer;
 }
 
 .button:hover,
 .button:focus {
-  background-color: #319890;
+  background-color:var(--bg-form-button-light);
 }
 
 .button-flat {
   background-color: transparent;
-  color: #9cbaba;
+  color: var(--text-light);
 }
 
 .button-flat:hover,
 .button-flat:focus {
   background-color: transparent;
-  color: #869999;
+  color: var(--text-light);
 }

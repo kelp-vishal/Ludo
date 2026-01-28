@@ -13,7 +13,7 @@ import { IGameStateUpdate } from '../../interfaces/ludoboard.interfaces';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './ludo-board.component.html',
-  styleUrls: ['./ludo-board.component.css'],
+  styleUrls: ['./ludo-board.component.scss'],
 })
 export class LudoBoardComponent implements OnInit, OnDestroy {
   Math = Math;
@@ -46,15 +46,63 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
     // Subscribe to socket game state updates from other players
     const socketStateSubscription =
       this.socketService.remoteGameState$.subscribe((remoteState) => {
-        if (
-          remoteState &&
-          remoteState.updatedBy !== this.socketService.getSocketId()
-        ) {
+        if (remoteState) {
           this.gameService.applyRemoteGameState(remoteState.gameState);
         }
       });
 
-    this.subscriptions.push(gameStateSubscription, socketStateSubscription);
+    // Subscribe to game-ended event
+    const gameEndedSubscription = this.socketService.gameEnded$.subscribe(
+      (data) => {
+        if (data) {
+          if (this.gameState) {
+            this.gameState.gameWon = data.winner || 'GAME_ENDED';
+          }
+          alert(
+            `Game Ended: ${data.reason}\n${data.winner ? `Winner: ${data.winner}` : ''}`,
+          );
+        }
+      },
+    );
+
+    // Subscribe to player-left event during active game
+    const playerLeftSubscription = this.socketService.playerLeft$.subscribe(
+      (data: { playerColor: string; playerName: string; }) => {
+        if (data && data.playerColor && this.gameState) {
+          console.log(`Player ${data.playerColor} disconnected, removing from game`);
+          
+          // Remove disconnected player from active players
+          this.gameState.activePlayers = this.gameState.activePlayers.filter(
+            (color) => color !== data.playerColor
+          );
+
+          // Remove all their pieces from the board
+          Object.keys(this.gameState.pieces).forEach((pieceId) => {
+            if (pieceId.startsWith(data.playerColor)) {
+              delete this.gameState!.pieces[pieceId];
+            }
+          });
+
+          // Adjust current turn if needed
+          if (this.gameState.activePlayers.length > 0) {
+            this.gameState.currentTurn = 
+              this.gameState.currentTurn % this.gameState.activePlayers.length;
+          }
+
+          // Clear movable pieces if it was their turn
+          this.gameState.movablePieces = [];
+          this.gameState.diceValue = 0;
+
+          // Update the game state
+          this.gameService.updateGameState(this.gameState);
+          
+          // Show notification
+          alert(`${data.playerName || data.playerColor} has disconnected. Game continues with ${this.gameState.activePlayers.length} players.`);
+        }
+      }
+    );
+
+    this.subscriptions.push(gameStateSubscription, socketStateSubscription, gameEndedSubscription, playerLeftSubscription);
   }
 
   ngOnDestroy(): void {
@@ -106,10 +154,11 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
   rollDice(): void {
     if (!this.gameState?.gameWon && this.isMyTurn()) {
       this.isRolling = true;
-      this.syncGameStateWithOthers();
+      // this.syncGameStateWithOthers();
 
       const diceValue = this.gameService.rollDice();
       this.valueDice.set(diceValue);
+      this.syncGameStateWithOthers();
 
       setTimeout(() => {
         this.isRolling = false;
@@ -151,21 +200,27 @@ export class LudoBoardComponent implements OnInit, OnDestroy {
     const oldPos = this.gameState?.pieces[pieceId] ?? -1;
 
     // Calculate new position before animating
-    const diceValue = this.gameState?.diceValue ?? 0;
-    let newPos = oldPos;
-    if (oldPos === -1 && diceValue === 6) {
-      newPos = 0;
-    } else if (oldPos >= 0) {
-      newPos = oldPos + diceValue;
-    }
+    // const diceValue = this.gameState?.diceValue ?? 0;
+    // let newPos = oldPos;
+    // if (oldPos === -1 && diceValue === 6) {
+    //   newPos = 0;
+    // } else if (oldPos >= 0) {
+    //   newPos = oldPos + diceValue;
+    // }
 
-    // Sync with othr players
-    this.syncGameStateWithOthers(pieceId, oldPos, newPos);
+    // // Sync with othr players
+    // this.syncGameStateWithOthers(pieceId, oldPos, newPos);
 
-    const moved = await this.gameService.movePiece(pieceId);
+    const moved = await this.gameService.movePiece(
+      pieceId,
+      (pId: string, fromPos: number, toPos: number) => {
+        this.syncGameStateWithOthers(pId, fromPos, toPos);
+      },
+    );
     if (moved === true) {
+      const newPos = this.gameState?.pieces[pieceId] ?? -1;
       //Sync
-      this.syncGameStateWithOthers();
+      this.syncGameStateWithOthers(pieceId, oldPos, newPos);
     }
   }
 

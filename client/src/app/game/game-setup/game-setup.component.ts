@@ -13,7 +13,7 @@ import { TurnOrder } from '../../common/enum/turn-order.enum';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './game-setup.component.html',
-  styleUrls: ['./game-setup.component.css'],
+  styleUrls: ['./game-setup.component.scss'],
 })
 export class GameSetupComponent implements OnInit {
   AvailableRoom: IAvailableRoom[] = [];

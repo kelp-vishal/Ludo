@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-header',
   imports: [CommonModule],
   templateUrl: './header.component.html',
-  styleUrl: './header.component.css',
+  styleUrl: './header.component.scss',
 })
 export class HeaderComponent implements OnInit {
   isLoggedIn = false;

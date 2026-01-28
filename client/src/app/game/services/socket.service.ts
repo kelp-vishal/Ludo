@@ -19,7 +19,9 @@ export class SocketService {
     Array<{ socketId: string; color?: string }>
   >([]);
   private gameStateSubject = new BehaviorSubject<IGameState | null>(null);
-  private gameStartedSubject = new BehaviorSubject<IGameState  | null>(null);
+  private gameStartedSubject = new BehaviorSubject<IGameState | null>(null);
+  private gameEndedSubject = new BehaviorSubject<any | null>(null);
+  private playerLeftSubject = new BehaviorSubject<any | null>(null);
   private remoteGameStateSubject = new BehaviorSubject<IRemoteGameState | null>(
     null,
   );
@@ -31,8 +33,10 @@ export class SocketService {
   currentRoom$ = this.currentRoomSubject.asObservable();
   playersInRoom$ = this.playersInRoomSubject.asObservable();
   gameState$ = this.gameStateSubject.asObservable();
+  gameEnded$ = this.gameEndedSubject.asObservable();
 
   gameStarted$ = this.gameStartedSubject.asObservable();
+  playerLeft$: any;
 
   constructor() {
     this.connect();
@@ -80,10 +84,15 @@ export class SocketService {
       },
     );
 
-    this.socket.on('player-left', (data: { room: IRoom; message: string }) => {
+    this.socket.on('player-left', (data: { room: IRoom; message: string ,gameState?:IGameState;playerColor?: string}) => {
       if (data.room) {
         this.currentRoomSubject.next(data.room);
         this.playersInRoomSubject.next(data.room.players);
+
+        this.playerLeftSubject.next(data);
+      }
+      if(data.gameState){
+        this.gameStateSubject.next(data.gameState);
       }
     });
 
@@ -97,6 +106,10 @@ export class SocketService {
 
     this.socket.on('game-state-update', (data: IRemoteGameState) => {
       this.remoteGameStateSubject.next(data);
+    });
+
+    this.socket.on('game-ended', (data: any) => {
+      this.gameEndedSubject.next(data);
     });
 
     this.socket.on('room-error', (data: { message: string }) => {});

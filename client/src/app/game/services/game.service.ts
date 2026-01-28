@@ -30,8 +30,8 @@ export class GameService {
 
   turnOrder: TurnOrder[] = [
     TurnOrder.RED,
-    TurnOrder.BLUE,
     TurnOrder.GREEN,
+    TurnOrder.BLUE,
     TurnOrder.YELLOW,
   ];
 
@@ -243,7 +243,10 @@ export class GameService {
     return movable;
   }
 
-  async movePiece(pieceId: string): Promise<boolean> {
+  async movePiece(
+    pieceId: string,
+    onStepUpdate?: (pieceId: string, fromPos: number, toPos: number) => void,
+  ): Promise<boolean> {
     const color = pieceId.split('_')[0];
     const currentPlayer =
       this.gameState.activePlayers[this.gameState.currentTurn];
@@ -264,6 +267,10 @@ export class GameService {
       this.gameState.pieces[pieceId] = 0;
       this.syncUiPieces();
       this.gameStateSubject.next({ ...this.gameState });
+
+      if (onStepUpdate) {
+        onStepUpdate(pieceId, -1, 0);
+      }
       await this.delay(400);
 
       // Keep turn because rolled 6 to come out
@@ -284,9 +291,15 @@ export class GameService {
 
     for (let step = 1; step <= steps; step++) {
       const currentPos = startPos + step;
+      const prevPos = this.gameState.pieces[pieceId];
       this.gameState.pieces[pieceId] = currentPos;
       this.syncUiPieces();
       this.gameStateSubject.next({ ...this.gameState });
+
+      // Notify about each step
+      if (onStepUpdate) {
+        onStepUpdate(pieceId, prevPos, currentPos);
+      }
 
       await this.delay(400);
     }
@@ -435,16 +448,27 @@ export class GameService {
     }
 
     if (remoteState.lastMove && remoteState.lastMove.pieceId) {
-      // Only animate, don't update other state yet
-      await this.animateRemoteMove(remoteState.lastMove);
+      // Animate the remote move
+      // await this.animateRemoteMove(remoteState.lastMove);
 
-      const { pieceId, toPos } = remoteState.lastMove;
+      const { pieceId, fromPos, toPos } = remoteState.lastMove;
       this.gameState.pieces[pieceId] = toPos;
+
+      //update full game state after animation
+      this.gameState.currentTurn = remoteState.currentTurn;
+      this.gameState.diceValue = remoteState.diceValue;
+      this.gameState.movablePieces = remoteState.movablePieces || [];
+      Object.keys(remoteState.pieces).forEach((otherpieceId) => {
+        if (otherpieceId !== pieceId) {
+          this.gameState.pieces[otherpieceId] =
+            remoteState.pieces[otherpieceId];
+        }
+      });
 
       this.syncUiPieces();
       this.gameStateSubject.next({ ...this.gameState });
     } else {
-      // Full state update (no animation)
+      // Full state update
       this.gameState.currentTurn = remoteState.currentTurn;
       this.gameState.diceValue = remoteState.diceValue;
       this.gameState.pieces = { ...remoteState.pieces };

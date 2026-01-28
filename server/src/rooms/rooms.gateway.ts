@@ -39,6 +39,39 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
 
+  // handleDisconnect(client: Socket): void {
+  //   this.logger.log(`User disconnected:, ${client.id}`);
+
+  //   const roomId = this.playerRooms.get(client.id);
+  //   if (!roomId) return;
+
+  //   const room = this.rooms.get(roomId);
+  //   if (!room) {
+  //     this.playerRooms.delete(client.id);
+  //     return;
+  //   }
+
+  //   room.players = room.players.filter((p) => p.socketId !== client.id);
+  //   room.currentPlayers = Math.max(0, room.currentPlayers - 1);
+
+  //   if (room.currentPlayers === 0) {
+  //     this.rooms.delete(roomId);
+  //     this.roomColorIndex.delete(roomId);
+  //   } else {
+  //     if (room.hostSocketId === client.id) {
+  //       room.hostSocketId = room.players[0]?.socketId;
+  //     }
+
+  //     this.server.to(roomId).emit('player-left', {
+  //       roomId,
+  //       room,
+  //       socketId: client.id,
+  //     });
+  //   }
+
+  //   this.playerRooms.delete(client.id);
+  // }
+
   handleDisconnect(client: Socket): void {
     this.logger.log(`User disconnected:, ${client.id}`);
 
@@ -51,21 +84,68 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
 
+    // Find the disconnecting player's color before removing
+    const disconnectingPlayer = room.players.find(
+      (p) => p.socketId === client.id,
+    );
+    const playerColor = disconnectingPlayer?.color;
+    const playerName = disconnectingPlayer?.playerName;
+
     room.players = room.players.filter((p) => p.socketId !== client.id);
     room.currentPlayers = Math.max(0, room.currentPlayers - 1);
 
     if (room.currentPlayers === 0) {
+      // All players left - clean up everything
       this.rooms.delete(roomId);
       this.roomColorIndex.delete(roomId);
+      this.logger.log(`Room ${roomId} deleted - all players left`);
     } else {
+      // Transfer host if needed
       if (room.hostSocketId === client.id) {
         room.hostSocketId = room.players[0]?.socketId;
+        this.logger.log(
+          `Host transferred to ${room.hostSocketId} in room ${roomId}`,
+        );
       }
 
-      this.server.to(roomId).emit('player-left', {
-        roomId,
-        room,
-        socketId: client.id,
+      // Handle game state if game has started
+      if (room.gameStarted && playerColor) {
+        // Check if game can continue (need at least 2 players)
+        if (room.currentPlayers < 2) {
+          room.gameStarted = false;
+          this.logger.log(`Game ended in room ${roomId} - not enough players`);
+
+          this.server.to(roomId).emit('game-ended', {
+            roomId,
+            room,
+            reason: `${playerName || playerColor} disconnected - not enough players to continue`,
+            winner: room.players[0]?.color || null,
+            winnerName: room.players[0]?.playerName || null,
+          });
+        } else {
+          // Game continues - notify remaining players
+          this.server.to(roomId).emit('player-left', {
+            roomId,
+            room,
+            socketId: client.id,
+            playerColor,
+            playerName,
+            message: `${playerName || playerColor} player disconnected. Game continues with ${room.currentPlayers} players.`,
+          });
+        }
+      } else {
+        // Game not started, just notify
+        this.server.to(roomId).emit('player-left', {
+          roomId,
+          room,
+          socketId: client.id,
+          message: `${playerName} left the room`,
+        });
+      }
+
+      // Broadcast updated rooms list
+      this.server.emit('rooms-list', {
+        rooms: Array.from(this.rooms.values()),
       });
     }
 
@@ -298,8 +378,8 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
 
-    // Broadcast game state to all players in the room
-    this.server.to(roomId).emit('game-state-update', {
+    // Broadcast game state to all other players in the room
+    client.to(roomId).emit('game-state-update', {
       gameState: data.gameState,
       updatedBy: client.id,
       timestamp: new Date(),

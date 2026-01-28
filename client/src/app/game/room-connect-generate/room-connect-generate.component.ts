@@ -6,7 +6,7 @@ import { SocketService } from '../services/socket.service';
   selector: 'app-room-connect-generate',
   imports: [],
   templateUrl: './room-connect-generate.component.html',
-  styleUrl: './room-connect-generate.component.css',
+  styleUrl: './room-connect-generate.component.scss',
 })
 export class RoomConnectGenerateComponent {
   constructor(

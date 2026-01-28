@@ -1,0 +1,63 @@
+.RoomCJ {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  height: 50vh;
+  place-content: var(--spacing-10); 
+  border-bottom: var(--border-2) solid var(--text-dark);
+}
+
+.createRoom,
+.joinRoom {
+  border: var(--border-2) solid var(--text-dark);
+  padding: var(--spacing-20);
+  margin: var(--spacing-10);
+  width: var(--room-width, 300px);
+  height: var(--room-height, 200px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  box-shadow: var(--shadow-room, 5px 5px 15px rgba(234, 205, 205, 0.3));
+  border-radius: var(--radius-10);
+}
+
+.createRoom h1,
+.joinRoom h1 {
+  font-size: var(--font-24, 24px);
+  margin-bottom: var(--spacing-20);
+}
+
+#roomName,
+#roomCode,
+#playerName {
+  background-color: var(--bg-room-coonect);
+}
+
+input {
+  color: var(--text-dark);
+}
+
+.containers {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  font-size: var(--font-large);
+  gap: var(--spacing-50);
+  margin-top: var(--spacing-20);
+  margin-bottom: var(--spacing-20);
+  font-weight: bold;
+}
+
+.local-btn {
+  margin-top: var(--spacing-20);
+  padding: var(--spacing-10) var(--spacing-20);
+  font-size: var(--font-18, 18px);
+  background-color: var(--bg-Border-green);
+  color: var(--text-dark);
+  border: none;
+  border-radius: var(--radius-5);
+  cursor: pointer;
+}

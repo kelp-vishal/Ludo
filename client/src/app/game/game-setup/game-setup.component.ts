@@ -1,0 +1,152 @@
+import { Component, OnInit } from '@angular/core';
+import { GameService } from '../services/game.service';
+import { RoomService, GameRoom } from '../services/room.service';
+import { SocketService } from '../services/socket.service';
+import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { IAvailableRoom } from '../../interfaces/ludoboard.interfaces';
+import { TurnOrder } from '../../common/enum/turn-order.enum';
+@Component({
+  selector: 'app-game-setup',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './game-setup.component.html',
+  styleUrls: ['./game-setup.component.scss'],
+})
+export class GameSetupComponent implements OnInit {
+  AvailableRoom: IAvailableRoom[] = [];
+  selectedPlayerCount: number = 2;
+  playerName: string = '';
+  view: 'menu' | 'create' | 'join' = 'menu';
+  availableRooms: IAvailableRoom[] = [];
+  selectedRoomId: string = '';
+  isSocketConnected: boolean = false;
+  socketId: string = '';
+  currentRoom$!: Observable<GameRoom | null>;
+
+  constructor(
+    private gameService: GameService,
+    private roomService: RoomService,
+    private socketService: SocketService,
+    public router: Router,
+  ) {}
+
+  turnOrder: TurnOrder[] = [
+    TurnOrder.RED,
+    TurnOrder.BLUE,
+    TurnOrder.GREEN,
+    TurnOrder.YELLOW,
+  ];
+
+  ngOnInit(): void {
+    this.currentRoom$ = this.roomService.currentRoom$;
+    // Checking socket connectin
+    this.socketService.connected$.subscribe((connected) => {
+      this.isSocketConnected = connected;
+    });
+
+    // Get socket ID
+    this.socketService.socketId$.subscribe((id) => {
+      this.socketId = id;
+    });
+
+    this.socketService.gameStarted$.subscribe((data) => {
+      if (!data) {
+        return;
+      }
+
+      const currentRoom = this.roomService.getCurrentRoom();
+
+      if (!currentRoom) {
+        return;
+      }
+
+      const joinedColors = currentRoom.players
+        .map((p) => p.color)
+        .filter((color): color is string => color !== undefined);
+      const playerColors = this.turnOrder.filter((c) =>
+        joinedColors.includes(c),
+      );
+      const myColor =
+        currentRoom.players.find((p) => p.socketId === this.socketId)?.color ||
+        'RED';
+      this.gameService.startGame(
+        currentRoom.currentPlayers,
+        playerColors,
+        myColor,
+      );
+
+      this.router.navigate(['/ludo-board']);
+    });
+
+    //available rooms
+    this.roomService.getRoomsList();
+
+    this.roomService.availableRooms$.subscribe((rooms) => {
+      this.availableRooms = rooms;
+    });
+  }
+
+  showCreateRoom(): void {
+    this.view = 'create';
+  }
+
+  showJoinRoom(): void {
+    this.view = 'join';
+    this.roomService.getRoomsList();
+  }
+
+  backToMenu(): void {
+    this.view = 'menu';
+  }
+
+  createRoom(): void {
+    if (!this.isSocketConnected) {
+      alert('Socket not connected. Please refresh the page.');
+      return;
+    }
+
+    if (this.playerName.trim() === '') {
+      alert('Please enter your name');
+      return;
+    }
+
+    this.roomService.createRoom(this.selectedPlayerCount, this.playerName);
+  }
+
+  joinRoom(roomId: string): void {
+    if (!this.isSocketConnected) {
+      alert('Socket not connected. Please refresh the page.');
+      return;
+    }
+
+    if (this.playerName.trim() === '') {
+      alert('Please enter your name');
+      return;
+    }
+
+    this.roomService.joinRoom(roomId, this.playerName);
+  }
+
+  startGameInRoom(): void {
+    const currentRoom = this.roomService.getCurrentRoom();
+    if (!currentRoom) {
+      alert('You need to be in a room to start the game');
+      return;
+    }
+
+    this.roomService.startGame();
+    // this.router.navigate(['/ludo-board']);
+  }
+
+  startGame(playerCount: number): void {
+    this.selectedPlayerCount = playerCount;
+    this.showCreateRoom();
+  }
+
+  isHost(room: { hostSocketId: string }): boolean {
+    return room?.hostSocketId === this.socketId;
+  }
+}
